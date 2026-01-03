@@ -46,7 +46,7 @@ export const getFileType = (mimeType: string): "image" | "document" | "audio" =>
  */
 export const fileToMessageContent = async (
   file: File
-): Promise<{ type: string; [key: string]: any }> => {
+): Promise<{ type: string; [key: string]: string | object }> => {
   const fileType = getFileType(file.type);
 
   if (fileType === "image") {
@@ -79,7 +79,7 @@ export const fileToMessageContent = async (
  */
 export const filesToMessageContent = async (
   files: File[]
-): Promise<Array<{ type: string; [key: string]: any }>> => {
+): Promise<Array<{ type: string; [key: string]: string | object }>> => {
   const contents = await Promise.all(files.map(fileToMessageContent));
   
   // Combine all contents into a single array

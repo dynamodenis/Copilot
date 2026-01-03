@@ -1,6 +1,6 @@
 import type { RunnableToolFunctionWithParse } from "openai/lib/RunnableFunction.mjs";
 import type { RunnableToolFunctionWithoutParse } from "openai/lib/RunnableFunction.mjs";
-import { googleImageTool } from "./tools/googleImage";
+import { tavilySearchTool } from "./tools/tavilySearch";
 import { weatherTool } from "./tools/weather";
 
 /**
@@ -8,13 +8,14 @@ import { weatherTool } from "./tools/weather";
  * Each tool is a function that the AI can use to perform specific tasks.
  *
  * Current tools:
- * - googleImageTool: Fetches image URLs based on text descriptions
+ * - tavilySearchTool: Web search powered by Tavily (recommended by Thesys)
+ * - weatherTool: Fetches weather data for a given location
  *
  * ADD MORE TOOLS HERE TO EXTEND THE AI'S CAPABILITIES
  */
 
 export const tools: (
   | RunnableToolFunctionWithoutParse
-  | RunnableToolFunctionWithParse<{ altText: string[] }>
+  | RunnableToolFunctionWithParse<{ searchQuery: string }>
   | RunnableToolFunctionWithParse<{ location: string }>
-)[] = [googleImageTool, weatherTool];
+)[] = [tavilySearchTool, weatherTool];
