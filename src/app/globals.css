@@ -4,6 +4,7 @@
   --background: #ffffff;
   --foreground: #171717;
   --sidebar-background: #151A2180;
+  --button-border-color: #60A5FA;
 }
 
 @theme inline {
@@ -12,6 +13,7 @@
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
   --color-sidebar-background: var(--sidebar-background);
+  --color-button-border: var(--button-border-color);
 }
 
 @media (prefers-color-scheme: dark) {
@@ -45,6 +47,18 @@ body {
   background: var(--color-sidebar-background) !important;
 }
 
+.crayon-shell-thread-message-user__content{
+  background-color: var(--color-sidebar-background) !important;
+}
+
+.crayon-card-card{
+  background-color: var(--color-sidebar-background) !important;
+}
+
+.crayon-icon-button-primary {
+  background-color: var(--color-sidebar-background) !important;
+  border-color: var(--color-button-border) !important;
+}
 /* Make C1Chat responsive on smaller screens */
 @media (max-width: 1200px) {
   .crayon-shell-thread-composer {
