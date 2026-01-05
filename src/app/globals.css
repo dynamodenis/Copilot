@@ -32,3 +32,27 @@ body {
   color: var(--foreground);
   font-family: var(--font-inter), sans-serif;
 }
+
+.crayon-shell-container {
+  width: 100% !important;
+  max-width: 100% !important;
+}
+
+/* Make C1Chat responsive on smaller screens */
+@media (max-width: 1200px) {
+  .crayon-shell-thread-composer {
+    max-width: 100% !important;
+    width: 100% !important;
+  }
+  
+  .crayon-shell-message-list {
+    max-width: 100% !important;
+  }
+}
+
+@media (max-width: 768px) {
+  .crayon-shell-thread-composer {
+    padding-left: 8px !important;
+    padding-right: 8px !important;
+  }
+}
