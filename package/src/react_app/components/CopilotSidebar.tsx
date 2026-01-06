@@ -1,8 +1,8 @@
 import { useState } from "react";
 import styles from "./CopilotSidebar.module.scss";
-import OrbiterLogo from "@/assets/sidebar/Orbiter logo.svg";
-import OutcomesLogo from "@/assets/sidebar/target-arrow.svg";
-import LeverageLoopsLogo from "@/assets/sidebar/swirl.svg";
+import OrbiterLogo from "@/react_app/assets/sidebar/Orbiter logo.svg";
+import OutcomesLogo from "@/react_app/assets/sidebar/target-arrow.svg";
+import LeverageLoopsLogo from "@/react_app/assets/sidebar/swirl.svg";
 
 export type SidebarSection = "copilot" | "outcomes" | "leverage-loops";
 
@@ -26,9 +26,21 @@ const outcomesData: SuggestionItem[] = [
     label: "Identify Launch Partners",
     status: "in-progress",
     children: [
-      { id: "2a", label: "Map Your Partnership Categories", status: "completed" },
-      { id: "2b", label: "Research & Score Potential Partners", status: "in-progress" },
-      { id: "2c", label: "Build Your Partnership Value Prop", status: "pending" },
+      {
+        id: "2a",
+        label: "Map Your Partnership Categories",
+        status: "completed",
+      },
+      {
+        id: "2b",
+        label: "Research & Score Potential Partners",
+        status: "in-progress",
+      },
+      {
+        id: "2c",
+        label: "Build Your Partnership Value Prop",
+        status: "pending",
+      },
       { id: "2d", label: "Identify Key Stakeholders", status: "pending" },
       { id: "2e", label: "Create Outreach Sequence", status: "pending" },
       { id: "2f", label: "Secure Agreements", status: "pending" },
@@ -48,16 +60,34 @@ const leverageLoopsData: SuggestionItem[] = [
   { id: "l3", label: "Growth Experiments", status: "pending" },
 ];
 
-const StatusIcon: React.FC<{ status: SuggestionItem["status"] }> = ({ status }) => {
+const StatusIcon: React.FC<{ status: SuggestionItem["status"] }> = ({
+  status,
+}) => {
   switch (status) {
     case "completed":
-      return <span className={styles.statusIcon} data-status="completed">✓</span>;
+      return (
+        <span className={styles.statusIcon} data-status="completed">
+          ✓
+        </span>
+      );
     case "in-progress":
-      return <span className={styles.statusIcon} data-status="in-progress">◐</span>;
+      return (
+        <span className={styles.statusIcon} data-status="in-progress">
+          ◐
+        </span>
+      );
     case "pending":
-      return <span className={styles.statusIcon} data-status="pending">○</span>;
+      return (
+        <span className={styles.statusIcon} data-status="pending">
+          ○
+        </span>
+      );
     case "archived":
-      return <span className={styles.statusIcon} data-status="archived">📁</span>;
+      return (
+        <span className={styles.statusIcon} data-status="archived">
+          📁
+        </span>
+      );
     default:
       return null;
   }
@@ -67,7 +97,9 @@ export const CopilotSidebar: React.FC<CopilotSidebarProps> = ({
   activeSection,
   onSectionChange,
 }) => {
-  const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set());
+  const [expandedSections, setExpandedSections] = useState<Set<string>>(
+    new Set()
+  );
   const [expandedItems, setExpandedItems] = useState<Set<string>>(new Set());
   const [searchQueries, setSearchQueries] = useState<Record<string, string>>({
     outcomes: "",
@@ -99,13 +131,17 @@ export const CopilotSidebar: React.FC<CopilotSidebarProps> = ({
     });
   };
 
-  const filterItems = (items: SuggestionItem[], query: string): SuggestionItem[] => {
+  const filterItems = (
+    items: SuggestionItem[],
+    query: string
+  ): SuggestionItem[] => {
     if (!query) return items;
-    return items.filter((item) =>
-      item.label.toLowerCase().includes(query.toLowerCase()) ||
-      item.children?.some((child) =>
-        child.label.toLowerCase().includes(query.toLowerCase())
-      )
+    return items.filter(
+      (item) =>
+        item.label.toLowerCase().includes(query.toLowerCase()) ||
+        item.children?.some((child) =>
+          child.label.toLowerCase().includes(query.toLowerCase())
+        )
     );
   };
 
@@ -116,17 +152,26 @@ export const CopilotSidebar: React.FC<CopilotSidebarProps> = ({
     return (
       <div key={item.id} className={styles.suggestionItemWrapper}>
         <button
-          className={`${styles.suggestionItem} ${isChild ? styles.childItem : ""}`}
+          className={`${styles.suggestionItem} ${
+            isChild ? styles.childItem : ""
+          }`}
           onClick={() => hasChildren && toggleItem(item.id)}
         >
           <StatusIcon status={item.status} />
           <span className={styles.suggestionLabel}>{item.label}</span>
           {hasChildren && (
-            <span className={`${styles.expandArrow} ${isExpanded ? styles.expanded : ""}`}>
+            <span
+              className={`${styles.expandArrow} ${
+                isExpanded ? styles.expanded : ""
+              }`}
+            >
               ▸
             </span>
           )}
-          <button className={styles.moreButton} onClick={(e) => e.stopPropagation()}>
+          <button
+            className={styles.moreButton}
+            onClick={(e) => e.stopPropagation()}
+          >
             ⋮
           </button>
         </button>
@@ -139,9 +184,11 @@ export const CopilotSidebar: React.FC<CopilotSidebarProps> = ({
     );
   };
 
-  const renderExpandableContent = (sectionId: "outcomes" | "leverage-loops") => {
+  const renderExpandableContent = (
+    sectionId: "outcomes" | "leverage-loops"
+  ) => {
     const data = sectionId === "outcomes" ? outcomesData : leverageLoopsData;
-    const filteredData = filterItems(data, searchQueries[sectionId]);
+    const filteredData = filterItems(data, searchQueries[sectionId] || "");
 
     return (
       <div className={styles.expandedContent}>
@@ -153,7 +200,10 @@ export const CopilotSidebar: React.FC<CopilotSidebarProps> = ({
             className={styles.searchInput}
             value={searchQueries[sectionId]}
             onChange={(e) =>
-              setSearchQueries((prev) => ({ ...prev, [sectionId]: e.target.value }))
+              setSearchQueries((prev) => ({
+                ...prev,
+                [sectionId]: e.target.value,
+              }))
             }
           />
         </div>
@@ -169,7 +219,9 @@ export const CopilotSidebar: React.FC<CopilotSidebarProps> = ({
       <nav className={styles.sidebarNav}>
         {/* Copilot Section */}
         <button
-          className={`${styles.sidebarItem} ${activeSection === "copilot" ? styles.active : ""}`}
+          className={`${styles.sidebarItem} ${
+            activeSection === "copilot" ? styles.active : ""
+          }`}
           onClick={() => onSectionChange("copilot")}
           aria-label="Orbiter.io Copilot"
         >
@@ -181,7 +233,11 @@ export const CopilotSidebar: React.FC<CopilotSidebarProps> = ({
 
         {/* Outcomes Section */}
         <div className={styles.sectionWrapper}>
-          <div className={`${styles.sectionHeader} ${activeSection === "outcomes" ? styles.active : ""}`}>
+          <div
+            className={`${styles.sectionHeader} ${
+              activeSection === "outcomes" ? styles.active : ""
+            }`}
+          >
             <button
               className={styles.sidebarItemInHeader}
               onClick={() => onSectionChange("outcomes")}
@@ -197,24 +253,38 @@ export const CopilotSidebar: React.FC<CopilotSidebarProps> = ({
               onClick={() => toggleSection("outcomes")}
               aria-label="Expand Outcomes"
             >
-              <span className={`${styles.plusIcon} ${expandedSections.has("outcomes") ? styles.rotated : ""}`}>
+              <span
+                className={`${styles.plusIcon} ${
+                  expandedSections.has("outcomes") ? styles.rotated : ""
+                }`}
+              >
                 +
               </span>
             </button>
           </div>
-          {expandedSections.has("outcomes") && renderExpandableContent("outcomes")}
+          {expandedSections.has("outcomes") &&
+            renderExpandableContent("outcomes")}
         </div>
 
         {/* Leverage Loops Section */}
         <div className={styles.sectionWrapper}>
-          <div className={`${styles.sectionHeader} ${activeSection === "leverage-loops" ? styles.active : ""}`}>
+          <div
+            className={`${styles.sectionHeader} ${
+              activeSection === "leverage-loops" ? styles.active : ""
+            }`}
+          >
             <button
               className={styles.sidebarItemInHeader}
               onClick={() => onSectionChange("leverage-loops")}
               aria-label="Leverage Loops"
             >
               <span className={styles.sidebarIcon}>
-                <img src={LeverageLoopsLogo} alt="Leverage Loops" width={18} height={18} />
+                <img
+                  src={LeverageLoopsLogo}
+                  alt="Leverage Loops"
+                  width={18}
+                  height={18}
+                />
               </span>
               <span className={styles.sidebarLabel}>Leverage Loops</span>
             </button>
@@ -223,15 +293,19 @@ export const CopilotSidebar: React.FC<CopilotSidebarProps> = ({
               onClick={() => toggleSection("leverage-loops")}
               aria-label="Expand Leverage Loops"
             >
-              <span className={`${styles.plusIcon} ${expandedSections.has("leverage-loops") ? styles.rotated : ""}`}>
+              <span
+                className={`${styles.plusIcon} ${
+                  expandedSections.has("leverage-loops") ? styles.rotated : ""
+                }`}
+              >
                 +
               </span>
             </button>
           </div>
-          {expandedSections.has("leverage-loops") && renderExpandableContent("leverage-loops")}
+          {expandedSections.has("leverage-loops") &&
+            renderExpandableContent("leverage-loops")}
         </div>
       </nav>
     </div>
   );
 };
-

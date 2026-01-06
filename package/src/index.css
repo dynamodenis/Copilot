@@ -1,8 +1,8 @@
 :root {
   --background: #ffffff;
   --foreground: #171717;
-  --sidebar-background: #151A2180;
-  --button-border-color: #60A5FA;
+  --sidebar-background: #151a2180;
+  --button-border-color: #60a5fa;
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-sidebar-background: var(--sidebar-background);
@@ -11,7 +11,7 @@
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0E0E0E;
+    --background: #0e0e0e;
     --foreground: #ededed;
   }
 }
@@ -31,7 +31,8 @@ body {
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    sans-serif;
 }
 
 #root {
@@ -67,7 +68,7 @@ body {
     max-width: 100% !important;
     width: 100% !important;
   }
-  
+
   .crayon-shell-message-list {
     max-width: 100% !important;
   }
@@ -79,4 +80,3 @@ body {
     padding-right: 8px !important;
   }
 }
-

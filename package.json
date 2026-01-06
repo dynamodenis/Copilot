@@ -1,41 +1,14 @@
 {
-  "name": "orbiter-copilot-client",
-  "private": true,
-  "version": "0.1.0",
-  "type": "module",
+  "name": "weweb-custom",
+  "version": "0.0.1",
   "scripts": {
-    "dev": "vite",
-    "build": "tsc -b && vite build",
-    "preview": "vite preview",
-    "lint": "eslint ."
-  },
-  "dependencies": {
-    "@crayonai/react-core": "^0.7.6",
-    "@crayonai/react-ui": "^0.9.0",
-    "@crayonai/stream": "^0.6.4",
-    "@radix-ui/react-dialog": "^1.1.0",
-    "@thesysai/genui-sdk": "^0.6.40",
-    "eventsource-parser": "^3.0.0",
-    "immer": "^10.0.0",
-    "react": "^19.0.0",
-    "react-dom": "^19.0.0",
-    "zod": "^3.23.0",
-    "zod-to-json-schema": "^3.24.0",
-    "zustand": "^5.0.0"
+    "build": "weweb build",
+    "serve": "weweb serve",
+    "build:local": "weweb build name=orbiter-copilot type=wwobject",
+    "build:package": "cd package && npm run build",
+    "dev": "cd package && npm run dev"
   },
   "devDependencies": {
-    "@eslint/js": "^9.17.0",
-    "@types/react": "^19.0.2",
-    "@types/react-dom": "^19.0.2",
-    "@vitejs/plugin-react": "^4.3.4",
-    "eslint": "^9.17.0",
-    "eslint-plugin-react-hooks": "^5.0.0",
-    "eslint-plugin-react-refresh": "^0.4.16",
-    "globals": "^15.14.0",
-    "sass": "^1.93.0",
-    "typescript": "~5.6.2",
-    "typescript-eslint": "^8.18.2",
-    "vite": "^6.0.5"
+    "@weweb/cli": "latest"
   }
 }
-
