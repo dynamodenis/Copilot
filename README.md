@@ -1,54 +1,84 @@
-# C1 App Template
+# Orbiter.io Copilot
 
-Template repository for a generative UI chat client, powered by [C1 by Thesys](https://thesys.dev), and bootstrapped with `create-next-app`
+A React + Vite frontend with Express backend for the Orbiter.io Copilot AI assistant, powered by Thesys C1 SDK.
 
-[![Built with Thesys](https://thesys.dev/built-with-thesys-badge.svg)](https://thesys.dev)
+## Project Structure
 
-## Getting Started
-
-### Setup
-
-1. Install dependencies:
-
-   ```bash
-   pnpm i
-   ```
-
-2. Set up environment variables by copying `.env.example` to `.env`:
-
-   ```bash
-   cp .env.example .env
-   ```
-
-3. Add your API keys to the `.env` file:
-
-   ```
-   THESYS_API_KEY=[your_thesys_api_key]
-   GOOGLE_API_KEY=[your_google_api_key]
-   GOOGLE_CX=[your_google_custom_search_id]
-   GEMINI_API_KEY=[your_gemini_api_key]
-   ```
-
-   Generate an API Key by logging into https://chat.thesys.dev/console/keys
-
-   Google Keys for image & web search. Read more about generating these keys here: https://developers.google.com/custom-search/v1/introduction
-
-   Gemini for summarization. Generate a key at https://aistudio.google.com/apikey
-
-### Development
-
-Run the development server:
-
-```bash
-pnpm run dev
+```
+├── client/                 # Vite + React frontend
+│   ├── src/
+│   │   ├── components/     # React components
+│   │   ├── assets/         # SVG icons
+│   │   ├── theme.ts        # Theme configuration
+│   │   └── App.tsx         # Main app
+│   ├── package.json
+│   └── vite.config.ts
+│
+├── server/                 # Express backend
+│   ├── src/
+│   │   ├── routes/         # API routes
+│   │   ├── services/       # Business logic & tools
+│   │   └── index.ts        # Server entry
+│   └── package.json
+│
+└── VITE_MIGRATION.md       # Detailed setup guide
 ```
 
-Open [http://localhost:3000](http://localhost:3000) in your browser.
+## Quick Start
 
-## Learn More
+### 1. Install Dependencies
 
-To learn more about Thesys C1, take a look at the [C1 Documentation](https://docs.thesys.dev) - learn about Thesys C1.
+```bash
+# Client
+cd client
+npm install --legacy-peer-deps
 
-## One-Click Deploy with Vercel
+# Server
+cd ../server
+npm install
+```
 
-[![Deploy with Vercel](https://vercel.com/button)](<https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fthesysdev%2Ftemplate-c1-next&env=THESYS_API_KEY&envDescription=Thesys%20Generative%20UI%20API%20key%20can%20be%20found%20in%20the%20Thesys%20console&envLink=https%3A%2F%2Fchat.thesys.dev%2Fconsole%2Fkeys&demo-title=C1%20Generative%20UI%20API&demo-description=C1%20Generative%20UI%20API%20by%20Thesys%20is%20designed%20to%20create%20dynamic%20and%20intelligent%20user%20interfaces.%20It%20leverages%20large%20language%20models%20(LLMs)%20to%20generate%20UI%20components%20in%20real-time%2C%20adapting%20to%20user%20input%20and%20context.%20Developers%20can%20integrate%20C1%20into%20their%20applications%20to%20enhance%20user%20engagement%20with%20visually%20rich%20and%20responsive%20interfaces.&demo-url=https%3A%2F%2Fchat.thesys.dev&demo-image=https%3A%2F%2Fgithub.com%2FCharlesCreativeContent%2FmyImages%2Fblob%2Fmain%2Fimages%2FC1Hero.png%3Fraw%3Dtrue>)
+### 2. Configure Environment
+
+Create `server/.env`:
+
+```env
+THESYS_API_KEY=your_thesys_api_key
+TAVILY_API_KEY=your_tavily_api_key
+PORT=3001
+```
+
+### 3. Run Development
+
+**Terminal 1 - Server:**
+```bash
+cd server
+npm run dev
+```
+
+**Terminal 2 - Client:**
+```bash
+cd client
+npm run dev
+```
+
+Visit `http://localhost:5173`
+
+## Features
+
+- 🤖 AI Chat powered by Thesys C1 with Generative UI
+- 🔍 Web search via Tavily
+- 🌤️ Weather tool integration
+- 🎨 Dark theme with custom styling
+- 📱 Responsive design
+
+## Tech Stack
+
+- **Frontend:** React 19, Vite, TypeScript, SCSS
+- **Backend:** Express, TypeScript
+- **AI:** Thesys C1 SDK, Tavily Search
+- **UI:** @thesysai/genui-sdk, @crayonai/react-ui
+
+## License
+
+Private

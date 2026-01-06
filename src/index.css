@@ -1,17 +1,10 @@
-@import "tailwindcss";
-
 :root {
   --background: #ffffff;
   --foreground: #171717;
   --sidebar-background: #151A2180;
   --button-border-color: #60A5FA;
-}
-
-@theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
   --color-sidebar-background: var(--sidebar-background);
   --color-button-border: var(--button-border-color);
 }
@@ -21,6 +14,10 @@
     --background: #0E0E0E;
     --foreground: #ededed;
   }
+}
+
+* {
+  box-sizing: border-box;
 }
 
 html,
@@ -34,7 +31,11 @@ body {
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: var(--font-inter), sans-serif;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+#root {
+  height: 100%;
 }
 
 .crayon-shell-container {
@@ -43,15 +44,15 @@ body {
   padding-top: 0 !important;
 }
 
-.crayon-shell-sidebar-container{
+.crayon-shell-sidebar-container {
   background: var(--color-sidebar-background) !important;
 }
 
-.crayon-shell-thread-message-user__content{
+.crayon-shell-thread-message-user__content {
   background-color: var(--color-sidebar-background) !important;
 }
 
-.crayon-card-card{
+.crayon-card-card {
   background-color: var(--color-sidebar-background) !important;
 }
 
@@ -59,6 +60,7 @@ body {
   background-color: var(--color-sidebar-background) !important;
   border-color: var(--color-button-border) !important;
 }
+
 /* Make C1Chat responsive on smaller screens */
 @media (max-width: 1200px) {
   .crayon-shell-thread-composer {
@@ -77,3 +79,4 @@ body {
     padding-right: 8px !important;
   }
 }
+

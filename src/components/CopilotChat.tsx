@@ -1,11 +1,10 @@
-"use client";
-
-import React from "react";
 import { C1Chat } from "@thesysai/genui-sdk";
 import "@crayonai/react-ui/styles/index.css";
 
+// Get API URL from environment variable, with fallback for development
+const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:3001";
+
 interface CopilotChatProps {
-  apiUrl?: string;
   agentName?: string;
   logoUrl?: string;
 }
@@ -16,23 +15,18 @@ interface CopilotChatProps {
  * A chatbot interface using Thesys C1 SDK's C1Chat component.
  * This component provides a full conversational UI with Gen UI capabilities.
  * 
- * File Upload Note:
- * C1Chat manages its own input component. To add file upload support:
- * 1. Use the customizeC1 prop to customize the chat input
- * 2. Or implement file upload handling in your backend API
- * 3. Files should be included in message content as per OpenAI format:
- *    - Images: { type: "image_url", image_url: { url: "data:image/..." } }
- *    - Other files: Convert to base64 or upload to file service
+ * API URL is configured via VITE_API_URL environment variable.
+ * - Development: http://localhost:3001 (Express server)
+ * - Production: Your Xano API URL
  */
 export const CopilotChat: React.FC<CopilotChatProps> = ({
-  apiUrl = "/api/chat",
   agentName = "Copilot",
   logoUrl,
 }) => {
   return (
     <div style={{ width: "100%", height: "100%" }}>
       <C1Chat
-        apiUrl={apiUrl}
+        apiUrl={`${API_BASE_URL}/api/chat`}
         formFactor="full-page"
         agentName={agentName}
         logoUrl={logoUrl}
@@ -41,3 +35,4 @@ export const CopilotChat: React.FC<CopilotChatProps> = ({
     </div>
   );
 };
+

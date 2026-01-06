@@ -1,11 +1,9 @@
-"use client";
-
-import React, { useState } from "react";
-import Image from "next/image";
+import { useState } from "react";
 import styles from "./CopilotSidebar.module.scss";
 import OrbiterLogo from "@/assets/sidebar/Orbiter logo.svg";
 import OutcomesLogo from "@/assets/sidebar/target-arrow.svg";
 import LeverageLoopsLogo from "@/assets/sidebar/swirl.svg";
+
 export type SidebarSection = "copilot" | "outcomes" | "leverage-loops";
 
 interface CopilotSidebarProps {
@@ -77,7 +75,6 @@ export const CopilotSidebar: React.FC<CopilotSidebarProps> = ({
   });
 
   const toggleSection = (sectionId: SidebarSection) => {
-    // Also select this section when clicking the plus button
     onSectionChange(sectionId);
     setExpandedSections((prev) => {
       const newSet = new Set(prev);
@@ -177,7 +174,7 @@ export const CopilotSidebar: React.FC<CopilotSidebarProps> = ({
           aria-label="Orbiter.io Copilot"
         >
           <span className={styles.sidebarIcon}>
-            <Image src={OrbiterLogo} alt="Orbiter" width={18} height={18} />
+            <img src={OrbiterLogo} alt="Orbiter" width={18} height={18} />
           </span>
           <span className={styles.sidebarLabel}>Orbiter.io Copilot</span>
         </button>
@@ -191,7 +188,7 @@ export const CopilotSidebar: React.FC<CopilotSidebarProps> = ({
               aria-label="Outcomes"
             >
               <span className={styles.sidebarIcon}>
-              <Image src={OutcomesLogo} alt="Outcomes" width={18} height={18} />
+                <img src={OutcomesLogo} alt="Outcomes" width={18} height={18} />
               </span>
               <span className={styles.sidebarLabel}>Outcomes</span>
             </button>
@@ -217,7 +214,7 @@ export const CopilotSidebar: React.FC<CopilotSidebarProps> = ({
               aria-label="Leverage Loops"
             >
               <span className={styles.sidebarIcon}>
-                <Image src={LeverageLoopsLogo} alt="Leverage Loops" width={18} height={18} />
+                <img src={LeverageLoopsLogo} alt="Leverage Loops" width={18} height={18} />
               </span>
               <span className={styles.sidebarLabel}>Leverage Loops</span>
             </button>
@@ -237,3 +234,4 @@ export const CopilotSidebar: React.FC<CopilotSidebarProps> = ({
     </div>
   );
 };
+

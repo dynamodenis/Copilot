@@ -1,6 +1,4 @@
-"use client";
-
-import React, { useState } from "react";
+import { useState } from "react";
 import { ThemeProvider } from "@thesysai/genui-sdk";
 import { CopilotSidebar, SidebarSection } from "./CopilotSidebar";
 import { CopilotChat } from "./CopilotChat";
@@ -47,3 +45,4 @@ export const CopilotApp: React.FC<CopilotAppProps> = ({
     </div>
   );
 };
+

@@ -1,6 +1,3 @@
-"use client";
-
-import React from "react";
 import styles from "./SectionPlaceholder.module.scss";
 
 export const OutcomesSection: React.FC = () => {
@@ -15,3 +12,4 @@ export const OutcomesSection: React.FC = () => {
     </div>
   );
 };
+
