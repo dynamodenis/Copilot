@@ -69,6 +69,7 @@ export const CopilotSidebar: React.FC<CopilotSidebarProps> = ({
 }) => {
   const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set());
   const [expandedItems, setExpandedItems] = useState<Set<string>>(new Set());
+  const [selectedItem, setSelectedItem] = useState<string | null>(null);
   const [searchQueries, setSearchQueries] = useState<Record<string, string>>({
     outcomes: "",
     "leverage-loops": "",
@@ -109,15 +110,26 @@ export const CopilotSidebar: React.FC<CopilotSidebarProps> = ({
     );
   };
 
+  const handleItemSelect = (item: SuggestionItem) => {
+    setSelectedItem(item.id);
+    onSectionChange("copilot"); // Open Copilot chat when item is selected
+  };
+
   const renderSuggestionItem = (item: SuggestionItem, isChild = false) => {
     const hasChildren = item.children && item.children.length > 0;
     const isExpanded = expandedItems.has(item.id);
+    const isSelected = selectedItem === item.id;
 
     return (
       <div key={item.id} className={styles.suggestionItemWrapper}>
         <button
-          className={`${styles.suggestionItem} ${isChild ? styles.childItem : ""}`}
-          onClick={() => hasChildren && toggleItem(item.id)}
+          className={`${styles.suggestionItem} ${isChild ? styles.childItem : ""} ${isSelected ? styles.selected : ""}`}
+          onClick={() => {
+            if (hasChildren) {
+              toggleItem(item.id);
+            }
+            handleItemSelect(item);
+          }}
         >
           <StatusIcon status={item.status} />
           <span className={styles.suggestionLabel}>{item.label}</span>
