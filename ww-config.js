@@ -1,16 +1,8 @@
 export default {
   editor: {
     label: {
-      en: "My Section",
+      en: "Orbiter Copilot",
     },
   },
-  properties: {
-    textColor: {
-      label: {
-        en: "Text color",
-      },
-      type: "Color",
-      defaultValue: "#F23636",
-    },
-  },
+  properties: {},
 };

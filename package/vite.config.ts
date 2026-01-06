@@ -13,8 +13,8 @@ export default defineConfig({
   build: {
     lib: {
       entry: resolve(__dirname, "src/react_app/main.ts"),
-      name: "OrbiterTiptap",
-      fileName: "orbiter-tiptap",
+      name: "OrbiterCopilot",
+      fileName: "orbiter-copilot",
     },
     rollupOptions: {
       external: ["vue"],
@@ -38,5 +38,6 @@ export default defineConfig({
       react: path.resolve(__dirname, "node_modules/react"),
       "react-dom": path.resolve(__dirname, "node_modules/react-dom"),
     },
+    dedupe: ["react", "react-dom"],
   },
 });

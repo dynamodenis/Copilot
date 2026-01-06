@@ -1,10 +1,7 @@
 <script setup lang="ts">
-import { CopilotApp } from "@/react_app/components/CopilotApp";
-import { applyPureReactInVue } from "veaury";
-
-const CopilotAppVue = applyPureReactInVue(CopilotApp);
+import CopilotApp from "@/react_app/VueCopilotApp.vue";
 </script>
 
 <template>
-  <CopilotAppVue />
+  <CopilotApp />
 </template>
