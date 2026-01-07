@@ -1,8 +1,25 @@
 {
-  "name": "package",
+  "name": "orbiter-copilot",
   "private": true,
-  "version": "0.0.0",
+  "version": "0.0.1",
   "type": "module",
+  "main": "./dist/orbiter-copilot.umd.cjs",
+  "module": "./dist/orbiter-copilot.js",
+  "style": "./dist/orbiter-copilot.css",
+  "files": [
+    "dist"
+  ],
+  "sideEffects": [
+    "**/*.css"
+  ],
+  "exports": {
+    ".": {
+      "import": "./dist/orbiter-copilot.js",
+      "require": "./dist/orbiter-copilot.umd.cjs"
+    },
+    "./style.css": "./dist/orbiter-copilot.css",
+    "./dist/*": "./dist/*"
+  },
   "scripts": {
     "dev": "vite",
     "build": "vue-tsc -b && vite build",
