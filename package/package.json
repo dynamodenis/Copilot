@@ -26,6 +26,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@crayonai/react-ui": "^0.9.10",
     "@thesysai/genui-sdk": "^0.7.15",
     "@vitejs/plugin-react": "^5.1.2",
     "@vitejs/plugin-vue-jsx": "^5.1.3",
