@@ -4,7 +4,7 @@
 
 <script>
 import "../package/dist/orbiter-copilot.css";
-import { CopilotApp } from "../package/dist/orbiter-copilot.umd.cjs";
+import { CopilotApp } from "../package/dist/orbiter-copilot";
 
 export default {
   components: {
