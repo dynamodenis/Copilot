@@ -3,7 +3,6 @@
 </template>
 
 <script>
-import "../package/dist/orbiter-copilot.css";
 import { CopilotApp } from "../package/dist/orbiter-copilot";
 
 export default {
