@@ -1,10 +1,10 @@
 import type { App } from "vue";
-import CopilotAppVue from "./VueCopilotApp.vue";
+import CopilotApp from "./CopilotApp.vue";
 
-export { CopilotAppVue as CopilotApp };
+export { CopilotApp };
 
 export default {
   install(app: App) {
-    app.component("CopilotApp", CopilotAppVue);
+    app.component("CopilotApp", CopilotApp);
   },
 };

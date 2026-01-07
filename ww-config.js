@@ -4,5 +4,4 @@ export default {
       en: "Orbiter Copilot",
     },
   },
-  properties: {},
 };

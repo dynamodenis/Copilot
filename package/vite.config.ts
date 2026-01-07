@@ -1,8 +1,8 @@
 import { defineConfig } from "vite";
-import path from "path";
 // @ts-expect-error: No type definitions for 'veaury/vite/index'
 import veauryVitePlugins from "veaury/vite/index";
 import { createRoot } from "react-dom/client";
+import path from "path";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -11,6 +11,7 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 // https://vite.dev/config/
 export default defineConfig({
   build: {
+    cssCodeSplit: false, // Inlines CSS into the JS bundle
     lib: {
       entry: resolve(__dirname, "src/react_app/main.ts"),
       name: "OrbiterCopilot",
@@ -22,6 +23,8 @@ export default defineConfig({
         globals: {
           vue: "Vue",
         },
+        exports: "named",
+        inlineDynamicImports: true, // Prevents code splitting
       },
     },
   },
@@ -37,6 +40,7 @@ export default defineConfig({
       "@": path.resolve(__dirname, "src"),
       react: path.resolve(__dirname, "node_modules/react"),
       "react-dom": path.resolve(__dirname, "node_modules/react-dom"),
+      "tiptap-copilot": path.resolve(__dirname, "src/react_app/main.ts"),
     },
     dedupe: ["react", "react-dom"],
   },

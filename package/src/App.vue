@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import CopilotApp from "@/react_app/VueCopilotApp.vue";
+import CopilotApp from "@/react_app/CopilotApp.vue";
 </script>
 
 <template>
