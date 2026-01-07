@@ -1,14 +1,14 @@
 <template>
-  <h1>Hello world</h1>
+  <CopilotApp />
 </template>
 
 <script>
-// import { CopilotApp } from "../package/dist/orbiter-copilot";
-// import "../package/dist/orbiter-copilot.css";
+import { CopilotApp } from "../package/dist/orbiter-copilot";
+import "../package/dist/orbiter-copilot.css";
 
 export default {
   components: {
-    // CopilotApp,
+    CopilotApp,
   },
 
   props: {
