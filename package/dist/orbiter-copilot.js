@@ -2074,7 +2074,7 @@ function cD() {
 }
 var fD = cD();
 function dD() {
-  return /* @__PURE__ */ fD.jsx("h1", { children: "Hello copilot" });
+  return /* @__PURE__ */ fD.jsx("h1", { className: "copilot-heading", children: "Hello copilot" });
 }
 var Kn = sv();
 const qR = /* @__PURE__ */ KR(Kn);

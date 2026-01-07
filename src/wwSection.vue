@@ -4,6 +4,7 @@
 
 <script>
 import { CopilotApp } from "../package/dist/orbiter-copilot";
+import "../package/dist/orbiter-copilot.scss";
 
 export default {
   components: {
