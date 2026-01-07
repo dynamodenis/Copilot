@@ -1,18 +1,15 @@
-import { C1Component } from "@thesysai/genui-sdk";
+// import "./copilot.scss";
+// export default function CopilotApp() {
+//   return <h1 className="copilot-heading">Hello copilot</h1>;
+// }
+
+import { ThemeProvider } from "@thesysai/genui-sdk";
 import "@crayonai/react-ui/styles/index.css";
-import { useEffect, useState } from "react";
 
 export default function CopilotApp() {
-  const [response, setResponse] = useState<string>("");
-
-  useEffect(() => {
-    const fetchResponse = async () => {
-      const response = await fetch("/chat");
-      const text = await response.text();
-      setResponse(text);
-    };
-    fetchResponse();
-  }, []);
-
-  return <C1Component c1Response={response} isStreaming={false} />;
+  return (
+    <ThemeProvider>
+      <h1>Hello copilot</h1>
+    </ThemeProvider>
+  );
 }
