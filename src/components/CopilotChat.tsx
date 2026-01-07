@@ -1,6 +1,4 @@
 import React, { useState, useCallback, useRef, useEffect } from "react";
-import { ThemeProvider } from "@thesysai/genui-sdk";
-import "@crayonai/react-ui/styles/index.css";
 import {
   ChatComposer,
   ChatMessage,
@@ -23,14 +21,14 @@ interface CopilotChatProps {
 const generateId = () => `msg-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
 
 /**
- * CopilotChat Component using C1Component
+ * CopilotChat Component
  *
  * This implementation gives you full control over:
  * - Conversation state management
  * - Form/action interception and editing
  * - Custom UI design
  *
- * Uses C1Component for rendering assistant messages with GenUI
+ * Uses custom React components for rendering messages
  */
 export const CopilotChat: React.FC<CopilotChatProps> = ({
   agentName = "Copilot",
@@ -155,7 +153,7 @@ export const CopilotChat: React.FC<CopilotChatProps> = ({
   );
 
   /**
-   * Handle actions from C1Component (forms, buttons, etc.)
+   * Handle actions from custom components (forms, buttons, etc.)
    * This is where you have full control!
    */
   const handleAction = useCallback(
@@ -194,7 +192,7 @@ export const CopilotChat: React.FC<CopilotChatProps> = ({
   );
 
   /**
-   * Handle message update from C1Component (for state persistence)
+   * Handle message update (for state persistence)
    */
   const handleUpdateMessage = useCallback((messageId: string, content: string) => {
     setMessages((prev) =>
@@ -223,48 +221,46 @@ export const CopilotChat: React.FC<CopilotChatProps> = ({
   }, []);
 
   return (
-    <ThemeProvider mode="dark">
-      <div className={styles.chatContainer}>
-        {/* Header */}
-        <div className={styles.header}>
-          <h1>{agentName}</h1>
-        </div>
-
-        {/* Messages */}
-        <div className={styles.messagesContainer}>
-          {messages.length === 0 ? (
-            <div className={styles.emptyState}>
-              <p>Start a conversation with {agentName}</p>
-            </div>
-          ) : (
-            messages.map((message) => (
-              <ChatMessage
-                key={message.id}
-                message={message}
-                onAction={handleAction}
-                onUpdateMessage={(content) =>
-                  handleUpdateMessage(message.id, content)
-                }
-              />
-            ))
-          )}
-          <div ref={messagesEndRef} />
-        </div>
-
-        {/* Input */}
-        <ChatComposer onSend={sendMessage} disabled={isLoading} />
-
-        {/* Edit Modal */}
-        {pendingAction && (
-          <EditPromptModal
-            isOpen={isModalOpen}
-            onClose={handleModalClose}
-            humanFriendlyMessage={pendingAction.humanFriendlyMessage}
-            llmFriendlyMessage={pendingAction.llmFriendlyMessage}
-            onConfirm={handleModalConfirm}
-          />
-        )}
+    <div className={styles.chatContainer}>
+      {/* Header */}
+      <div className={styles.header}>
+        <h1>{agentName}</h1>
       </div>
-    </ThemeProvider>
+
+      {/* Messages */}
+      <div className={styles.messagesContainer}>
+        {messages.length === 0 ? (
+          <div className={styles.emptyState}>
+            <p>Start a conversation with {agentName}</p>
+          </div>
+        ) : (
+          messages.map((message) => (
+            <ChatMessage
+              key={message.id}
+              message={message}
+              onAction={handleAction}
+              onUpdateMessage={(content) =>
+                handleUpdateMessage(message.id, content)
+              }
+            />
+          ))
+        )}
+        <div ref={messagesEndRef} />
+      </div>
+
+      {/* Input */}
+      <ChatComposer onSend={sendMessage} disabled={isLoading} />
+
+      {/* Edit Modal */}
+      {pendingAction && (
+        <EditPromptModal
+          isOpen={isModalOpen}
+          onClose={handleModalClose}
+          humanFriendlyMessage={pendingAction.humanFriendlyMessage}
+          llmFriendlyMessage={pendingAction.llmFriendlyMessage}
+          onConfirm={handleModalConfirm}
+        />
+      )}
+    </div>
   );
 };

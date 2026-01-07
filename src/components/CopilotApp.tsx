@@ -1,10 +1,8 @@
 import { useState } from "react";
-import { ThemeProvider } from "@thesysai/genui-sdk";
 import { CopilotSidebar, SidebarSection } from "./CopilotSidebar";
 import { CopilotChat } from "./CopilotChat";
 import { OutcomesSection } from "./OutcomesSection";
 import { LeverageLoopsSection } from "./LeverageLoopsSection";
-import { theme, darkTheme, themeMode } from "@/theme";
 import styles from "./CopilotApp.module.scss";
 
 interface CopilotAppProps {
@@ -33,14 +31,11 @@ export const CopilotApp: React.FC<CopilotAppProps> = ({
 
   return (
     <div className={styles.app}>
-      <ThemeProvider theme={theme} darkTheme={darkTheme} mode={themeMode as "light" | "dark"}>
-        <CopilotSidebar
-          activeSection={activeSection}
-          onSectionChange={setActiveSection}
-        />
-        <main className={styles.mainContent}>{renderContent()}</main>
-      </ThemeProvider>
+      <CopilotSidebar
+        activeSection={activeSection}
+        onSectionChange={setActiveSection}
+      />
+      <main className={styles.mainContent}>{renderContent()}</main>
     </div>
   );
 };
-

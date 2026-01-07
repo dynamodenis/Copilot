@@ -44,23 +44,11 @@
   color: var(--color-text-primary);
   font-size: 14px;
   line-height: 1.6;
+}
 
-  // Style C1Component content
-  :global {
-    .crayon-c1-root {
-      background: transparent !important;
-    }
-
-    // Override form button colors
-    .crayon-button-base-primary {
-      background-color: var(--color-button-primary-background) !important;
-      color: var(--color-text-primary) !important;
-    }
-
-    .crayon-button-base-primary:hover {
-      background-color: var(--color-button-primary-background-hover) !important;
-    }
-  }
+.textContent {
+  white-space: pre-wrap;
+  word-break: break-word;
 }
 
 .streamingIndicator {

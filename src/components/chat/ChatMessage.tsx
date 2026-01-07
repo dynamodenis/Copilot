@@ -1,5 +1,4 @@
 import React from "react";
-import { C1Component } from "@thesysai/genui-sdk";
 import styles from "./ChatMessage.module.scss";
 import type { ChatMessage as ChatMessageType, ActionEvent } from "./types";
 
@@ -12,25 +11,28 @@ interface ChatMessageProps {
 /**
  * Renders a single chat message
  * - User messages: Simple styled text
- * - Assistant messages: Rendered with C1Component for GenUI
+ * - Assistant messages: Plain text (you can add custom Gen UI components here)
  */
 export const ChatMessage: React.FC<ChatMessageProps> = ({
   message,
-  onAction,
-  onUpdateMessage,
+  // These props are available for custom Gen UI components
+  onAction: _onAction,
+  onUpdateMessage: _onUpdateMessage,
 }) => {
   const isUser = message.role === "user";
   const isAssistant = message.role === "assistant";
 
-  // Handle action from C1Component
-  const handleAction = (event: ActionEvent) => {
-    console.log("C1Component action:", event);
-    onAction?.(event);
-  };
-
-  // Handle message update (for state persistence)
-  const handleUpdateMessage = (content: string) => {
-    onUpdateMessage?.(content);
+  // Example: Parse message content for custom Gen UI components
+  // You can implement your own parsing logic here
+  const renderAssistantContent = () => {
+    // For now, render as plain text
+    // TODO: Add your custom Gen UI component rendering logic here
+    // Example: Parse JSON from API and render custom components
+    return (
+      <div className={styles.textContent}>
+        {message.content || (message.isStreaming ? "" : "No response")}
+      </div>
+    );
   };
 
   return (
@@ -45,22 +47,16 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
         </div>
       ) : isAssistant ? (
         <div className={styles.assistantMessage}>
-          {message.isStreaming ? (
+          {message.isStreaming && !message.content && (
             <div className={styles.streamingIndicator}>
               <span></span>
               <span></span>
               <span></span>
             </div>
-          ) : null}
-          <C1Component
-            c1Response={message.content}
-            isStreaming={message.isStreaming ?? false}
-            onAction={handleAction}
-            updateMessage={handleUpdateMessage}
-          />
+          )}
+          {renderAssistantContent()}
         </div>
       ) : null}
     </div>
   );
 };
-
