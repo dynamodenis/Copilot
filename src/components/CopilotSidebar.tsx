@@ -1,5 +1,6 @@
 import { useState } from "react";
 import styles from "./CopilotSidebar.module.scss";
+import { ExpandableContent, SuggestionItem } from "./shared";
 import OrbiterLogo from "@/assets/sidebar/Orbiter logo.svg";
 import OutcomesLogo from "@/assets/sidebar/target-arrow.svg";
 import LeverageLoopsLogo from "@/assets/sidebar/swirl.svg";
@@ -11,14 +12,8 @@ interface CopilotSidebarProps {
   onSectionChange: (section: SidebarSection) => void;
 }
 
-interface SuggestionItem {
-  id: string;
-  label: string;
-  status: "completed" | "in-progress" | "pending" | "archived";
-  children?: SuggestionItem[];
-}
-
 // Sample data for Outcomes section
+// TODO: Replace with actual data fetching
 const outcomesData: SuggestionItem[] = [
   { id: "1", label: "Brand Identity Design", status: "completed" },
   {
@@ -42,38 +37,19 @@ const outcomesData: SuggestionItem[] = [
 ];
 
 // Sample data for Leverage Loops section
+// TODO: Replace with actual data fetching
 const leverageLoopsData: SuggestionItem[] = [
   { id: "l1", label: "Customer Feedback Loop", status: "completed" },
   { id: "l2", label: "Product Iteration Cycle", status: "in-progress" },
   { id: "l3", label: "Growth Experiments", status: "pending" },
 ];
 
-const StatusIcon: React.FC<{ status: SuggestionItem["status"] }> = ({ status }) => {
-  switch (status) {
-    case "completed":
-      return <span className={styles.statusIcon} data-status="completed">✓</span>;
-    case "in-progress":
-      return <span className={styles.statusIcon} data-status="in-progress">◐</span>;
-    case "pending":
-      return <span className={styles.statusIcon} data-status="pending">○</span>;
-    case "archived":
-      return <span className={styles.statusIcon} data-status="archived">📁</span>;
-    default:
-      return null;
-  }
-};
-
 export const CopilotSidebar: React.FC<CopilotSidebarProps> = ({
   activeSection,
   onSectionChange,
 }) => {
   const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set());
-  const [expandedItems, setExpandedItems] = useState<Set<string>>(new Set());
   const [selectedItem, setSelectedItem] = useState<string | null>(null);
-  const [searchQueries, setSearchQueries] = useState<Record<string, string>>({
-    outcomes: "",
-    "leverage-loops": "",
-  });
 
   const toggleSection = (sectionId: SidebarSection) => {
     onSectionChange(sectionId);
@@ -88,92 +64,9 @@ export const CopilotSidebar: React.FC<CopilotSidebarProps> = ({
     });
   };
 
-  const toggleItem = (itemId: string) => {
-    setExpandedItems((prev) => {
-      const newSet = new Set(prev);
-      if (newSet.has(itemId)) {
-        newSet.delete(itemId);
-      } else {
-        newSet.add(itemId);
-      }
-      return newSet;
-    });
-  };
-
-  const filterItems = (items: SuggestionItem[], query: string): SuggestionItem[] => {
-    if (!query) return items;
-    return items.filter((item) =>
-      item.label.toLowerCase().includes(query.toLowerCase()) ||
-      item.children?.some((child) =>
-        child.label.toLowerCase().includes(query.toLowerCase())
-      )
-    );
-  };
-
   const handleItemSelect = (item: SuggestionItem) => {
     setSelectedItem(item.id);
     onSectionChange("copilot"); // Open Copilot chat when item is selected
-  };
-
-  const renderSuggestionItem = (item: SuggestionItem, isChild = false) => {
-    const hasChildren = item.children && item.children.length > 0;
-    const isExpanded = expandedItems.has(item.id);
-    const isSelected = selectedItem === item.id;
-
-    return (
-      <div key={item.id} className={styles.suggestionItemWrapper}>
-        <button
-          className={`${styles.suggestionItem} ${isChild ? styles.childItem : ""} ${isSelected ? styles.selected : ""}`}
-          onClick={() => {
-            if (hasChildren) {
-              toggleItem(item.id);
-            }
-            handleItemSelect(item);
-          }}
-        >
-          <StatusIcon status={item.status} />
-          <span className={styles.suggestionLabel}>{item.label}</span>
-          {hasChildren && (
-            <span className={`${styles.expandArrow} ${isExpanded ? styles.expanded : ""}`}>
-              ▸
-            </span>
-          )}
-          <button className={styles.moreButton} onClick={(e) => e.stopPropagation()}>
-            ⋮
-          </button>
-        </button>
-        {hasChildren && isExpanded && (
-          <div className={styles.childrenContainer}>
-            {item.children!.map((child) => renderSuggestionItem(child, true))}
-          </div>
-        )}
-      </div>
-    );
-  };
-
-  const renderExpandableContent = (sectionId: "outcomes" | "leverage-loops") => {
-    const data = sectionId === "outcomes" ? outcomesData : leverageLoopsData;
-    const filteredData = filterItems(data, searchQueries[sectionId]);
-
-    return (
-      <div className={styles.expandedContent}>
-        <div className={styles.searchContainer}>
-          <span className={styles.searchIcon}>🔍</span>
-          <input
-            type="text"
-            placeholder="Search..."
-            className={styles.searchInput}
-            value={searchQueries[sectionId]}
-            onChange={(e) =>
-              setSearchQueries((prev) => ({ ...prev, [sectionId]: e.target.value }))
-            }
-          />
-        </div>
-        <div className={styles.suggestionsList}>
-          {filteredData.map((item) => renderSuggestionItem(item))}
-        </div>
-      </div>
-    );
   };
 
   return (
@@ -214,7 +107,14 @@ export const CopilotSidebar: React.FC<CopilotSidebarProps> = ({
               </span>
             </button>
           </div>
-          {expandedSections.has("outcomes") && renderExpandableContent("outcomes")}
+          {expandedSections.has("outcomes") && (
+            <ExpandableContent
+              contentType="outcomes"
+              items={outcomesData}
+              selectedItemId={selectedItem}
+              onItemSelect={handleItemSelect}
+            />
+          )}
         </div>
 
         {/* Leverage Loops Section */}
@@ -240,10 +140,16 @@ export const CopilotSidebar: React.FC<CopilotSidebarProps> = ({
               </span>
             </button>
           </div>
-          {expandedSections.has("leverage-loops") && renderExpandableContent("leverage-loops")}
+          {expandedSections.has("leverage-loops") && (
+            <ExpandableContent
+              contentType="leverage-loops"
+              items={leverageLoopsData}
+              selectedItemId={selectedItem}
+              onItemSelect={handleItemSelect}
+            />
+          )}
         </div>
       </nav>
     </div>
   );
 };
-
