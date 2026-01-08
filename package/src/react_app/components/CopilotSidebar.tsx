@@ -1,6 +1,9 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import styles from "./CopilotSidebar.module.scss";
 import { ExpandableContent, type SuggestionItem } from "./shared";
+
+import { useLeverageLoopsStore } from "@/react_app/store/leverageLoopsStore";
+
 import OrbiterLogo from "@/react_app/assets/sidebar/Orbiter logo.svg";
 import OutcomesLogo from "@/react_app/assets/sidebar/target-arrow.svg";
 import LeverageLoopsLogo from "@/react_app/assets/sidebar/swirl.svg";
@@ -48,6 +51,15 @@ export const CopilotSidebar: React.FC<CopilotSidebarProps> = ({
   activeSection,
   onSectionChange,
 }) => {
+  // TODO: Use these for actual data fetching
+  const { leverageLoops, fetchLeverageLoops, isLoading, error } = useLeverageLoopsStore((state) => ({
+    leverageLoops: state.leverageLoops,
+    fetchLeverageLoops: state.fetchLeverageLoops,
+    isLoading: state.isLoading,
+    error: state.error
+  }));
+
+
   const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set());
   const [selectedItem, setSelectedItem] = useState<string | null>(null);
 
@@ -68,6 +80,10 @@ export const CopilotSidebar: React.FC<CopilotSidebarProps> = ({
     setSelectedItem(item.id);
     onSectionChange("copilot"); // Open Copilot chat when item is selected
   };
+
+  useEffect(() => {
+    fetchLeverageLoops();
+  }, []);
 
   return (
     <div className={styles.sidebar}>
