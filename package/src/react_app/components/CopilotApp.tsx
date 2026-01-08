@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { CopilotSidebar, SidebarSection } from "./CopilotSidebar";
+import { CopilotSidebar, type SidebarSection } from "./CopilotSidebar";
 import { CopilotChat } from "./CopilotChat";
 import { OutcomesSection } from "./OutcomesSection";
 import { LeverageLoopsSection } from "./LeverageLoopsSection";
@@ -39,3 +39,5 @@ export const CopilotApp: React.FC<CopilotAppProps> = ({
     </div>
   );
 };
+
+export default CopilotApp;

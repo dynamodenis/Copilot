@@ -3,9 +3,9 @@ import {
   ChatComposer,
   ChatMessage,
   EditPromptModal,
-  ChatMessageType,
-  PendingAction,
-  ActionEvent,
+  type ChatMessageType,
+  type PendingAction,
+  type ActionEvent,
 } from "./chat";
 import styles from "./CopilotChat.module.scss";
 

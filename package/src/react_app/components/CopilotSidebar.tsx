@@ -1,9 +1,9 @@
 import { useState } from "react";
 import styles from "./CopilotSidebar.module.scss";
-import { ExpandableContent, SuggestionItem } from "./shared";
-import OrbiterLogo from "@/assets/sidebar/Orbiter logo.svg";
-import OutcomesLogo from "@/assets/sidebar/target-arrow.svg";
-import LeverageLoopsLogo from "@/assets/sidebar/swirl.svg";
+import { ExpandableContent, type SuggestionItem } from "./shared";
+import OrbiterLogo from "@/react_app/assets/sidebar/Orbiter logo.svg";
+import OutcomesLogo from "@/react_app/assets/sidebar/target-arrow.svg";
+import LeverageLoopsLogo from "@/react_app/assets/sidebar/swirl.svg";
 
 export type SidebarSection = "copilot" | "outcomes" | "leverage-loops";
 

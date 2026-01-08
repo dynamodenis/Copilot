@@ -1,6 +1,6 @@
 import { useState } from "react";
 import styles from "./ExpandableContent.module.scss";
-import { SuggestionItem, ContentType } from "./types";
+import type { SuggestionItem, ContentType } from "./types";
 
 interface ExpandableContentProps {
   contentType: ContentType;
