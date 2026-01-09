@@ -1,9 +1,9 @@
 import { useState, useEffect } from "react";
 import { useShallow } from "zustand/react/shallow";
 import styles from "./CopilotSidebar.module.scss";
-import { ExpandableContent } from "./shared";
+import { LeverageLoopContent } from "./shared";
 
-import { useLeverageLoopsStore, type LeverageLoopPerson } from "@/react_app/store/leverageLoopsStore";
+import { useLeverageLoopsStore, type LeverageLoopPerson, type SuggestionRequest } from "@/react_app/store/leverageLoopsStore";
 
 import OrbiterLogo from "@/react_app/assets/sidebar/Orbiter logo.svg";
 import OutcomesLogo from "@/react_app/assets/sidebar/target-arrow.svg";
@@ -45,10 +45,12 @@ export const CopilotSidebar: React.FC<CopilotSidebarProps> = ({
   activeSection,
   onSectionChange,
 }) => {
-  const { leverageLoops: _leverageLoops, fetchLeverageLoops, isLoading: _isLoading, error: _error } = useLeverageLoopsStore(
+  const { leverageLoops: _leverageLoops, suggestionRequests: _suggestionRequests, fetchNetworkPersons,fetchSuggestionRequests, isLoading: _isLoading, error: _error } = useLeverageLoopsStore(
     useShallow((state) => ({
       leverageLoops: state.leverageLoops,
-      fetchLeverageLoops: state.fetchLeverageLoops,
+      suggestionRequests: state.suggestionRequests,
+      fetchNetworkPersons: state.fetchNetworkPersons,
+      fetchSuggestionRequests: state.fetchSuggestionRequests,
       isLoading: state.isLoading,
       error: state.error,
     }))
@@ -58,6 +60,7 @@ export const CopilotSidebar: React.FC<CopilotSidebarProps> = ({
 
 
   const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set());
+  const [selectedSuggestionRequest, setSelectedSuggestionRequest] = useState<SuggestionRequest | null>(null);
   const [selectedItem, setSelectedItem] = useState<LeverageLoopPerson | null>(null);
 
   const toggleSection = (sectionId: SidebarSection) => {
@@ -75,12 +78,20 @@ export const CopilotSidebar: React.FC<CopilotSidebarProps> = ({
 
   const handleItemSelect = (item: LeverageLoopPerson) => {
     setSelectedItem(item);
+    // When you select leverage loop person, deselect the selected suggestion request
+    setSelectedSuggestionRequest(null);
     onSectionChange("copilot"); // Open Copilot chat when item is selected
+  };
+  const handleSuggestionRequestSelect = (suggestionRequest: SuggestionRequest) => {
+    setSelectedSuggestionRequest(suggestionRequest);
+    // When you select leverage loop suggestion, deselect the selected person
+    setSelectedItem(null);
+    onSectionChange("copilot");
   };
 
   useEffect(() => {
-    fetchLeverageLoops();
-    
+    fetchNetworkPersons();
+    fetchSuggestionRequests();
   }, []);
 
   return (
@@ -155,11 +166,13 @@ export const CopilotSidebar: React.FC<CopilotSidebarProps> = ({
             </button>
           </div>
           {expandedSections.has("leverage-loops") && (
-            <ExpandableContent
+            <LeverageLoopContent
               contentType="leverage-loops"
               items={_leverageLoops}
               selectedItem={selectedItem ?? null}
+              selectedSuggestionRequest={selectedSuggestionRequest ?? null}   
               onItemSelect={handleItemSelect}
+              onSuggestionRequestSelect={handleSuggestionRequestSelect}
               isLoading={_isLoading}
               error={_error}
             />

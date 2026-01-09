@@ -1,3 +1,3 @@
-export { ExpandableContent } from "./ExpandableContent";
+export { LeverageLoopContent } from "./LeverageLoopContent";
 export * from "./types";
 

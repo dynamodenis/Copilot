@@ -1,4 +1,5 @@
 import { create } from "zustand";
+import { devtools } from 'zustand/middleware';
 
 export interface MasterEmail {
   id: number;
@@ -46,18 +47,33 @@ export interface LeverageLoopPerson {
   master_person: MasterPerson;
 }
 
+export interface SuggestionRequest {
+  id: number;
+  request_panel_title: string;
+  request_header_title: string;
+  request_context: string;
+  status: "draft" | "activated" | "processsing" | "suggestion_made" | "archived";
+  leverage_loop_suggestions: any[];
+  leverage_loop_suggestion_count: number;
+}
+
 interface LeverageLoopsStore {
   leverageLoops: LeverageLoopPerson[];
+  suggestionRequests: SuggestionRequest[];
   isLoading: boolean;
   error: string | null;
-  fetchLeverageLoops: () => Promise<void>;
+  fetchNetworkPersons: () => Promise<void>;
+  fetchSuggestionRequests: () => Promise<void>;
   setLeverageLoops: (leverageLoops: LeverageLoopPerson[]) => void;
   addLeverageLoops: (leverageLoops: LeverageLoopPerson[]) => void;
 }
 
+
+
 const baseUrl = import.meta.env.VITE_API_URL;
 const token = import.meta.env.VITE_API_TOKEN;
 const dataSource = import.meta.env.VITE_DATA_SOURCE;
+
 if (!baseUrl) {
   console.error('VITE_API_URL is not defined in environment variables');
 }
@@ -65,11 +81,12 @@ if (!token) {
   console.error('VITE_API_TOKEN is not defined in environment variables');
 }
 
-export const useLeverageLoopsStore = create<LeverageLoopsStore>((set) => ({
+export const useLeverageLoopsStore = create<LeverageLoopsStore>()(devtools((set) => ({
   leverageLoops: [],
+  suggestionRequests: [],
   isLoading: false,
   error: null,
-  fetchLeverageLoops: async () => {
+  fetchNetworkPersons: async () => {
     set({ isLoading: true, error: null })
     try {
       const headers = {
@@ -96,7 +113,33 @@ export const useLeverageLoopsStore = create<LeverageLoopsStore>((set) => ({
       });
     }
   },
+  fetchSuggestionRequests: async () => {
+    set({ isLoading: true, error: null })
+    try {
+      const headers = {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
+        'x-data-source': dataSource
+      };
+      const response = await fetch(`${baseUrl}/suggestion-requests?copilot_mode=loop`, { headers });
+      
+      const data = await response.json();
+      
+      if (!response.ok) {
+        // Extract error message from API response
+        const apiMessage = data?.message || data?.error || 'Failed to fetch suggestion requests';
+        const errorMessage = `HTTP ${response.status}: ${apiMessage}`;
+        throw new Error(errorMessage);
+      }
+      set({ suggestionRequests: data?.items ?? [], isLoading: false });
 
+    } catch (error) {
+      set({
+        error: error instanceof Error ? error.message : 'Unknown error',
+        isLoading: false
+      });
+    }
+  },
   setLeverageLoops: (leverageLoops) => set({ leverageLoops }),
   addLeverageLoops: (newLoops) => set((state) => ({ leverageLoops: [...state.leverageLoops, ...newLoops] })),
-}));
+})));
