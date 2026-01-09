@@ -10,6 +10,7 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 
 // https://vite.dev/config/
 export default defineConfig({
+  envDir: resolve(__dirname, ".."), // Load .env from root directory
   build: {
     cssCodeSplit: false, // Inlines CSS into the JS bundle
     lib: {

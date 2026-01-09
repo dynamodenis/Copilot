@@ -1,37 +1,36 @@
 import { useState } from "react";
 import styles from "./ExpandableContent.module.scss";
-import type { ContentType } from "./types";
-import type { LeverageLoopPerson } from "@/react_app/store/leverageLoopsStore";
+import type { SuggestionItem, ContentType } from "./types";
 
 interface ExpandableContentProps {
   contentType: ContentType;
-  items: LeverageLoopPerson[];
-  selectedItem: LeverageLoopPerson | null;
-  onItemSelect: (item: LeverageLoopPerson) => void;
+  items: SuggestionItem[];
+  selectedItemId: string | null;
+  onItemSelect: (item: SuggestionItem) => void;
   isLoading?: boolean;
   emptyMessage?: string;
   error?: string | null;
 }
 
-const StatusIcon: React.FC<{ status: LeverageLoopPerson["status"] }> = ({ status }) => {
+const StatusIcon: React.FC<{ status: SuggestionItem["status"] }> = ({ status }) => {
   switch (status) {
     case "completed":
       return <span className={styles.statusIcon} data-status="completed">✓</span>;
-    // case "in-progress":
-    //   return <span className={styles.statusIcon} data-status="in-progress">◐</span>;
-    // case "pending":
-    //   return <span className={styles.statusIcon} data-status="pending">○</span>;
-    // case "archived":
-    //   return <span className={styles.statusIcon} data-status="archived">📁</span>;
+    case "in-progress":
+      return <span className={styles.statusIcon} data-status="in-progress">◐</span>;
+    case "pending":
+      return <span className={styles.statusIcon} data-status="pending">○</span>;
+    case "archived":
+      return <span className={styles.statusIcon} data-status="archived">📁</span>;
     default:
-      return <span className={styles.statusIcon} data-status="completed">✓</span>;
+      return null;
   }
 };
 
-export const ExpandableContent: React.FC<ExpandableContentProps> = ({
+export const OutcomesContent: React.FC<ExpandableContentProps> = ({
   contentType,
   items,
-  selectedItem,
+  selectedItemId,
   onItemSelect,
   isLoading = false,
   emptyMessage = "No items found",
@@ -39,8 +38,6 @@ export const ExpandableContent: React.FC<ExpandableContentProps> = ({
 }) => {
   const [expandedItems, setExpandedItems] = useState<Set<string>>(new Set());
   const [searchQuery, setSearchQuery] = useState("");
-
-  void expandedItems;
 
   const toggleItem = (itemId: string) => {
     setExpandedItems((prev) => {
@@ -54,48 +51,48 @@ export const ExpandableContent: React.FC<ExpandableContentProps> = ({
     });
   };
 
-  const filterItems = (items: LeverageLoopPerson[], query: string): LeverageLoopPerson[] => {
+  const filterItems = (items: SuggestionItem[], query: string): SuggestionItem[] => {
     if (!query) return items;
     return items.filter((item) =>
-      item.full_name?.toLowerCase().includes(query.toLowerCase()) ||
-      // item.my_person_emails.some((email) => email.email_address.toLowerCase().includes(query.toLowerCase())) ||
-      item.master_person.name?.toLowerCase().includes(query.toLowerCase()) ||
-      item.master_person.current_title?.toLowerCase().includes(query.toLowerCase()) ||
-      item.master_person.bio?.toLowerCase().includes(query.toLowerCase()) ||
-      item.master_person.master_company?.company_name?.toLowerCase().includes(query.toLowerCase())
+      item.label.toLowerCase().includes(query.toLowerCase()) ||
+      item.children?.some((child) =>
+        child.label.toLowerCase().includes(query.toLowerCase())
+      )
     );
   };
 
-  const renderLeverageLoopPersons = (item: LeverageLoopPerson, isChild = false) => {
-    const isSelected = selectedItem?.full_name === item.full_name;
+  const renderSuggestionItem = (item: SuggestionItem, isChild = false) => {
+    const hasChildren = item.children && item.children.length > 0;
+    const isExpanded = expandedItems.has(item.id);
+    const isSelected = selectedItemId === item.id;
 
     return (
       <div key={item.id} className={styles.suggestionItemWrapper}>
         <button
           className={`${styles.suggestionItem} ${isChild ? styles.childItem : ""} ${isSelected ? styles.selected : ""}`}
           onClick={() => {
-            // if (hasChildren) {
-            toggleItem(item.full_name);
-            // }
+            if (hasChildren) {
+              toggleItem(item.id);
+            }
             onItemSelect(item);
           }}
         >
           <StatusIcon status={item.status} />
-          <span className={styles.suggestionLabel}>{item.full_name}</span>
-          {/* {hasChildren && (
+          <span className={styles.suggestionLabel}>{item.label}</span>
+          {hasChildren && (
             <span className={`${styles.expandArrow} ${isExpanded ? styles.expanded : ""}`}>
               ▸
             </span>
-          )} */}
+          )}
           <button className={styles.moreButton} onClick={(e) => e.stopPropagation()}>
             ⋮
           </button>
         </button>
-        {/* {hasChildren && isExpanded && (
+        {hasChildren && isExpanded && (
           <div className={styles.childrenContainer}>
-            {item.children!.map((child) => renderLeverageLoopPersons(child, true))}
+            {item.children!.map((child) => renderSuggestionItem(child, true))}
           </div>
-        )} */}
+        )}
       </div>
     );
   };
@@ -129,12 +126,12 @@ export const ExpandableContent: React.FC<ExpandableContentProps> = ({
             {error}
           </div>
         ) : (
-          filteredItems.map((item) => renderLeverageLoopPersons(item))
+          filteredItems.map((item) => renderSuggestionItem(item))
         )}
       </div>
     </div>
   );
 };
 
-export default ExpandableContent;
+export default OutcomesContent;
 

@@ -219,3 +219,22 @@
   font-size: 13px;
 }
 
+.errorState {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 12px;
+  margin: 8px;
+  background-color: rgba(255, 166, 0, 0.1);
+  border: 1px solid rgba(255, 166, 0, 0.3);
+  border-radius: 6px;
+  color: #f5a623;
+  font-size: 14px;
+  line-height: 1.4;
+
+  &::before {
+    content: "⚠";
+    flex-shrink: 0;
+  }
+}
+

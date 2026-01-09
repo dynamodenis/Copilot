@@ -1,8 +1,9 @@
 import { useState, useEffect } from "react";
+import { useShallow } from "zustand/react/shallow";
 import styles from "./CopilotSidebar.module.scss";
-import { ExpandableContent, type SuggestionItem } from "./shared";
+import { ExpandableContent } from "./shared";
 
-import { useLeverageLoopsStore } from "@/react_app/store/leverageLoopsStore";
+import { useLeverageLoopsStore, type LeverageLoopPerson } from "@/react_app/store/leverageLoopsStore";
 
 import OrbiterLogo from "@/react_app/assets/sidebar/Orbiter logo.svg";
 import OutcomesLogo from "@/react_app/assets/sidebar/target-arrow.svg";
@@ -17,51 +18,47 @@ interface CopilotSidebarProps {
 
 // Sample data for Outcomes section
 // TODO: Replace with actual data fetching
-const outcomesData: SuggestionItem[] = [
-  { id: "1", label: "Brand Identity Design", status: "completed" },
-  {
-    id: "2",
-    label: "Identify Launch Partners",
-    status: "in-progress",
-    children: [
-      { id: "2a", label: "Map Your Partnership Categories", status: "completed" },
-      { id: "2b", label: "Research & Score Potential Partners", status: "in-progress" },
-      { id: "2c", label: "Build Your Partnership Value Prop", status: "pending" },
-      { id: "2d", label: "Identify Key Stakeholders", status: "pending" },
-      { id: "2e", label: "Create Outreach Sequence", status: "pending" },
-      { id: "2f", label: "Secure Agreements", status: "pending" },
-    ],
-  },
-  { id: "3", label: "Onboard Operator Pilots", status: "pending" },
-  { id: "4", label: "1st Paying Enterprise Pilot", status: "pending" },
-  { id: "5", label: "Close $30M+ Seed Round", status: "pending" },
-  { id: "6", label: "Press Pickup", status: "pending" },
-  { id: "7", label: "Archived", status: "archived" },
-];
+// const outcomesData: SuggestionItem[] = [
+//   { id: "1", label: "Brand Identity Design", status: "completed" },
+//   {
+//     id: "2",
+//     label: "Identify Launch Partners",
+//     status: "in-progress",
+//     children: [
+//       { id: "2a", label: "Map Your Partnership Categories", status: "completed" },
+//       { id: "2b", label: "Research & Score Potential Partners", status: "in-progress" },
+//       { id: "2c", label: "Build Your Partnership Value Prop", status: "pending" },
+//       { id: "2d", label: "Identify Key Stakeholders", status: "pending" },
+//       { id: "2e", label: "Create Outreach Sequence", status: "pending" },
+//       { id: "2f", label: "Secure Agreements", status: "pending" },
+//     ],
+//   },
+//   { id: "3", label: "Onboard Operator Pilots", status: "pending" },
+//   { id: "4", label: "1st Paying Enterprise Pilot", status: "pending" },
+//   { id: "5", label: "Close $30M+ Seed Round", status: "pending" },
+//   { id: "6", label: "Press Pickup", status: "pending" },
+//   { id: "7", label: "Archived", status: "archived" },
+// ];
 
-// Sample data for Leverage Loops section
-// TODO: Replace with actual data fetching
-const leverageLoopsData: SuggestionItem[] = [
-  { id: "l1", label: "Customer Feedback Loop", status: "completed" },
-  { id: "l2", label: "Product Iteration Cycle", status: "in-progress" },
-  { id: "l3", label: "Growth Experiments", status: "pending" },
-];
 
 export const CopilotSidebar: React.FC<CopilotSidebarProps> = ({
   activeSection,
   onSectionChange,
 }) => {
-  // TODO: Use these for actual data fetching
-  const { leverageLoops, fetchLeverageLoops, isLoading, error } = useLeverageLoopsStore((state) => ({
-    leverageLoops: state.leverageLoops,
-    fetchLeverageLoops: state.fetchLeverageLoops,
-    isLoading: state.isLoading,
-    error: state.error
-  }));
+  const { leverageLoops: _leverageLoops, fetchLeverageLoops, isLoading: _isLoading, error: _error } = useLeverageLoopsStore(
+    useShallow((state) => ({
+      leverageLoops: state.leverageLoops,
+      fetchLeverageLoops: state.fetchLeverageLoops,
+      isLoading: state.isLoading,
+      error: state.error,
+    }))
+  );
+  // TODO: Use these values when implementing the UI
+  void _leverageLoops; void _isLoading;
 
 
   const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set());
-  const [selectedItem, setSelectedItem] = useState<string | null>(null);
+  const [selectedItem, setSelectedItem] = useState<LeverageLoopPerson | null>(null);
 
   const toggleSection = (sectionId: SidebarSection) => {
     onSectionChange(sectionId);
@@ -76,13 +73,14 @@ export const CopilotSidebar: React.FC<CopilotSidebarProps> = ({
     });
   };
 
-  const handleItemSelect = (item: SuggestionItem) => {
-    setSelectedItem(item.id);
+  const handleItemSelect = (item: LeverageLoopPerson) => {
+    setSelectedItem(item);
     onSectionChange("copilot"); // Open Copilot chat when item is selected
   };
 
   useEffect(() => {
     fetchLeverageLoops();
+    
   }, []);
 
   return (
@@ -123,14 +121,14 @@ export const CopilotSidebar: React.FC<CopilotSidebarProps> = ({
               </span>
             </button>
           </div>
-          {expandedSections.has("outcomes") && (
+          {/* {expandedSections.has("outcomes") && (
             <ExpandableContent
               contentType="outcomes"
               items={outcomesData}
               selectedItemId={selectedItem}
               onItemSelect={handleItemSelect}
             />
-          )}
+          )} */}
         </div>
 
         {/* Leverage Loops Section */}
@@ -159,9 +157,11 @@ export const CopilotSidebar: React.FC<CopilotSidebarProps> = ({
           {expandedSections.has("leverage-loops") && (
             <ExpandableContent
               contentType="leverage-loops"
-              items={leverageLoopsData}
-              selectedItemId={selectedItem}
+              items={_leverageLoops}
+              selectedItem={selectedItem ?? null}
               onItemSelect={handleItemSelect}
+              isLoading={_isLoading}
+              error={_error}
             />
           )}
         </div>
