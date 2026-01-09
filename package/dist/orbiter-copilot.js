@@ -2221,8 +2221,9 @@ const IE = (v) => {
     try {
       const y = {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${fD}`
-      }, m = await fetch(`${cD}/my-persons?x-data-source=${dD}`, { headers: y }), R = await m.json();
+        Authorization: `Bearer ${fD}`,
+        "x-data-source": dD
+      }, m = await fetch(`${cD}/my-persons`, { headers: y }), R = await m.json();
       if (!m.ok) {
         const L = R?.message || R?.error || "Failed to fetch loops", b = `HTTP ${m.status}: ${L}`;
         throw new Error(b);

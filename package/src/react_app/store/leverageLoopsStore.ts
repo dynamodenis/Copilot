@@ -74,9 +74,10 @@ export const useLeverageLoopsStore = create<LeverageLoopsStore>((set) => ({
     try {
       const headers = {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`
+        'Authorization': `Bearer ${token}`,
+        'x-data-source': dataSource
       };
-      const response = await fetch(`${baseUrl}/my-persons?x-data-source=${dataSource}`, { headers });
+      const response = await fetch(`${baseUrl}/my-persons`, { headers });
       
       const data = await response.json();
       
