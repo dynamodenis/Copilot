@@ -225,6 +225,12 @@ $spacing-xl: 24px;
   gap: $spacing-sm;
 }
 
+.checkboxGroup {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-sm;
+}
+
 // List Component
 .list {
   .listHeading {

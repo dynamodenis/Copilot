@@ -17,6 +17,8 @@ export {
   TextArea, 
   Select, 
   Checkbox, 
-  RadioGroup 
+  RadioGroup,
+  CheckBoxGroup,
+  DatePicker,
 } from './Form';
 

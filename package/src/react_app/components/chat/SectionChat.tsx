@@ -186,10 +186,29 @@ export const SectionChat: React.FC<SectionChatProps> = ({
         }
         break;
 
+      case "submit_form":
+        // Handle form submission - format form data and send to LLM
+        if (event.params?.formData) {
+          const formData = event.params.formData as Record<string, unknown>;
+          const formName = event.params.formName as string || 'form';
+          
+          // Format form data as a readable message for the LLM
+          const formEntries = Object.entries(formData)
+            .filter(([_, value]) => value !== undefined && value !== '')
+            .map(([key, value]) => `${key.replace(/_/g, ' ')}: ${value}`)
+            .join('\n');
+          
+          const message = `Form submitted: ${formName}\n\n${formEntries}`;
+          
+          console.log("Sending form data to LLM:", message);
+          sendMessage(message);
+        }
+        break;
+
       default:
         console.log("Unhandled action type:", event.type);
     }
-  }, []);
+  }, [sendMessage]);
 
   /**
    * Handle message update (for state persistence)

@@ -7,6 +7,8 @@ import type {
   SelectProps,
   CheckboxProps,
   RadioGroupProps,
+  CheckBoxGroupProps,
+  DatePickerProps,
   GenUIComponentDef,
   ActionProps,
 } from '../types';
@@ -192,6 +194,78 @@ export const RadioGroup: React.FC<RadioGroupProps> = ({
         </div>
       ))}
     </div>
+  );
+};
+
+// CheckBoxGroup Component
+export const CheckBoxGroup: React.FC<CheckBoxGroupProps> = ({
+  name,
+  options = [],
+  values = [],
+  onChange,
+}) => {
+  const [selectedValues, setSelectedValues] = useState<string[]>(values);
+
+  const handleChange = (optionValue: string, checked: boolean) => {
+    const newValues = checked
+      ? [...selectedValues, optionValue]
+      : selectedValues.filter(v => v !== optionValue);
+    setSelectedValues(newValues);
+    onChange?.(name, newValues);
+  };
+
+  // Guard against undefined/null options
+  if (!options || !Array.isArray(options) || options.length === 0) {
+    return <div className={styles.checkboxGroup}>No options available</div>;
+  }
+
+  return (
+    <div className={styles.checkboxGroup}>
+      {options.map((option) => (
+        <div key={option.value} className={styles.checkboxWrapper}>
+          <input
+            type="checkbox"
+            id={`${name}-${option.value}`}
+            name={name}
+            value={option.value}
+            checked={selectedValues.includes(option.value)}
+            onChange={(e) => handleChange(option.value, e.target.checked)}
+          />
+          <label htmlFor={`${name}-${option.value}`}>{option.label}</label>
+        </div>
+      ))}
+    </div>
+  );
+};
+
+// DatePicker Component
+export const DatePicker: React.FC<DatePickerProps> = ({
+  name,
+  placeholder,
+  value = '',
+  min,
+  max,
+  onChange,
+}) => {
+  const [localValue, setLocalValue] = useState(value);
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newValue = e.target.value;
+    setLocalValue(newValue);
+    onChange?.(name, newValue);
+  };
+
+  return (
+    <input
+      type="date"
+      name={name}
+      placeholder={placeholder}
+      value={localValue}
+      min={min}
+      max={max}
+      onChange={handleChange}
+      className={styles.input}
+    />
   );
 };
 

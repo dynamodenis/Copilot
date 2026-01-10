@@ -118,6 +118,24 @@ export interface RadioGroupProps extends BaseGenUIProps {
   onChange?: (name: string, value: string) => void;
 }
 
+// CheckBoxGroup props
+export interface CheckBoxGroupProps extends BaseGenUIProps {
+  name: string;
+  options: { value: string; label: string }[];
+  values?: string[];
+  onChange?: (name: string, values: string[]) => void;
+}
+
+// DatePicker props
+export interface DatePickerProps extends BaseGenUIProps {
+  name: string;
+  placeholder?: string;
+  value?: string;
+  min?: string;
+  max?: string;
+  onChange?: (name: string, value: string) => void;
+}
+
 // Form field wrapper
 export interface FormFieldProps extends BaseGenUIProps {
   label?: string;

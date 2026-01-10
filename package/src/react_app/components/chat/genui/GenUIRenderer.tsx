@@ -21,6 +21,8 @@ import {
   Select,
   Checkbox,
   RadioGroup,
+  CheckBoxGroup,
+  DatePicker,
 } from './components';
 
 interface GenUIRendererProps {
@@ -163,6 +165,12 @@ export const GenUIRenderer: React.FC<GenUIRendererProps> = ({
       
       case 'RadioGroup':
         return <RadioGroup {...componentProps as React.ComponentProps<typeof RadioGroup>} />;
+      
+      case 'CheckBoxGroup':
+        return <CheckBoxGroup {...componentProps as React.ComponentProps<typeof CheckBoxGroup>} />;
+      
+      case 'DatePicker':
+        return <DatePicker {...componentProps as React.ComponentProps<typeof DatePicker>} />;
       
       default:
         console.warn(`Unknown component: ${componentName}`);
