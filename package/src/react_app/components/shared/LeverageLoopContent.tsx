@@ -86,7 +86,6 @@ export const LeverageLoopContent: React.FC<LeverageLoopContentProps> = ({
   };
 
   const filterLeverageLoopPersons = (persons: LeverageLoopPerson[], query: string): LeverageLoopPerson[] => {
-    console.log("persons in filterLeverageLoopPersons", persons);
     if (!query) return [];
     return persons.filter((person) =>
       person.full_name?.toLowerCase().includes(query.toLowerCase()) ||

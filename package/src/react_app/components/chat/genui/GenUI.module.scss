@@ -1,0 +1,487 @@
+// GenUI Component Styles
+// A cohesive design system for AI-generated UI components
+
+// Variables
+$border-radius-sm: 6px;
+$border-radius-md: 10px;
+$border-radius-lg: 14px;
+$spacing-xs: 4px;
+$spacing-sm: 8px;
+$spacing-md: 12px;
+$spacing-lg: 16px;
+$spacing-xl: 24px;
+
+// Card Component
+.card {
+  background: var(--genui-card-bg, rgba(255, 255, 255, 0.03));
+  border: 1px solid var(--genui-border, rgba(255, 255, 255, 0.08));
+  border-radius: $border-radius-lg;
+  padding: $spacing-lg;
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-md;
+}
+
+// Header Component
+.header {
+  .headerTitle {
+    margin: 0 0 $spacing-xs 0;
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--color-text-primary);
+  }
+
+  .headerSubtitle {
+    margin: 0;
+    font-size: 13px;
+    color: var(--color-text-muted);
+  }
+}
+
+// TextContent Component
+.textContent {
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--color-text-secondary);
+
+  p {
+    margin: 0 0 $spacing-sm 0;
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+  }
+
+  strong {
+    color: var(--color-text-primary);
+    font-weight: 600;
+  }
+
+  code {
+    background: rgba(255, 255, 255, 0.05);
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-family: 'SF Mono', 'Fira Code', monospace;
+    font-size: 13px;
+  }
+}
+
+// Button Component
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: $spacing-sm;
+  padding: 10px 16px;
+  border-radius: $border-radius-sm;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  border: none;
+
+  &.primary {
+    background: var(--genui-primary, #6366f1);
+    color: white;
+
+    &:hover {
+      background: var(--genui-primary-hover, #5457e5);
+      transform: translateY(-1px);
+    }
+
+    &:active {
+      transform: translateY(0);
+    }
+  }
+
+  &.secondary {
+    background: rgba(255, 255, 255, 0.08);
+    color: var(--color-text-primary);
+    border: 1px solid var(--genui-border, rgba(255, 255, 255, 0.12));
+
+    &:hover {
+      background: rgba(255, 255, 255, 0.12);
+    }
+  }
+
+  &.ghost {
+    background: transparent;
+    color: var(--genui-primary, #6366f1);
+
+    &:hover {
+      background: rgba(99, 102, 241, 0.1);
+    }
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+.buttonGroup {
+  display: flex;
+  gap: $spacing-sm;
+
+  &.horizontal {
+    flex-direction: row;
+  }
+
+  &.vertical {
+    flex-direction: column;
+  }
+}
+
+// Form Components
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-md;
+}
+
+.formField {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-xs;
+
+  .fieldLabel {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--color-text-primary);
+  }
+
+  .fieldHint {
+    font-size: 12px;
+    color: var(--color-text-muted);
+  }
+}
+
+.input,
+.textarea,
+.select {
+  width: 100%;
+  padding: 10px 12px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--genui-border, rgba(255, 255, 255, 0.1));
+  border-radius: $border-radius-sm;
+  font-size: 14px;
+  color: var(--color-text-primary);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+
+  &::placeholder {
+    color: var(--color-text-muted);
+  }
+
+  &:focus {
+    outline: none;
+    border-color: var(--genui-primary, #6366f1);
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
+  }
+
+  &.error {
+    border-color: #ef4444;
+  }
+}
+
+.textarea {
+  resize: vertical;
+  min-height: 80px;
+}
+
+.select {
+  cursor: pointer;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23888' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  padding-right: 36px;
+}
+
+// Checkbox & Radio
+.checkboxWrapper,
+.radioWrapper {
+  display: flex;
+  align-items: center;
+  gap: $spacing-sm;
+  cursor: pointer;
+
+  input {
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+    accent-color: var(--genui-primary, #6366f1);
+  }
+
+  label {
+    font-size: 14px;
+    color: var(--color-text-primary);
+    cursor: pointer;
+  }
+}
+
+.radioGroup {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-sm;
+}
+
+// List Component
+.list {
+  .listHeading {
+    margin: 0 0 $spacing-sm 0;
+    font-size: 13px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--color-text-muted);
+  }
+
+  .listItems {
+    display: flex;
+    flex-direction: column;
+    gap: $spacing-xs;
+  }
+}
+
+.listItem {
+  display: flex;
+  align-items: center;
+  gap: $spacing-md;
+  padding: $spacing-md;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid transparent;
+  border-radius: $border-radius-md;
+  transition: all 0.15s ease;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.04);
+    border-color: var(--genui-border, rgba(255, 255, 255, 0.08));
+  }
+
+  .listItemIcon {
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(99, 102, 241, 0.1);
+    border-radius: $border-radius-sm;
+    color: var(--genui-primary, #6366f1);
+  }
+
+  .listItemContent {
+    flex: 1;
+
+    .listItemTitle {
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--color-text-primary);
+      margin: 0;
+    }
+
+    .listItemSubtitle {
+      font-size: 13px;
+      color: var(--color-text-muted);
+      margin: 2px 0 0 0;
+    }
+  }
+
+  .listItemAction {
+    .actionButton {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      padding: 6px 12px;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid var(--genui-border, rgba(255, 255, 255, 0.1));
+      border-radius: $border-radius-sm;
+      font-size: 13px;
+      color: var(--color-text-primary);
+      cursor: pointer;
+      transition: all 0.15s ease;
+
+      &:hover {
+        background: var(--genui-primary, #6366f1);
+        border-color: var(--genui-primary, #6366f1);
+        color: white;
+      }
+    }
+  }
+}
+
+// Stats Component
+.stats {
+  text-align: right;
+
+  .statsNumber {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--genui-primary, #6366f1);
+    margin: 0;
+  }
+
+  .statsLabel {
+    font-size: 12px;
+    color: var(--color-text-muted);
+    margin: 2px 0 0 0;
+  }
+}
+
+// ProfileTile Component
+.profileTile {
+  display: flex;
+  align-items: center;
+  gap: $spacing-md;
+
+  .profileIcon {
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(99, 102, 241, 0.1);
+    border-radius: $border-radius-sm;
+    color: var(--genui-primary, #6366f1);
+  }
+
+  .profileContent {
+    .profileTitle {
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--color-text-primary);
+      margin: 0;
+    }
+
+    .profileLabel {
+      font-size: 12px;
+      color: var(--color-text-muted);
+      margin: 2px 0 0 0;
+    }
+  }
+}
+
+// MiniCard Component
+.miniCard {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: $spacing-md;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid var(--genui-border, rgba(255, 255, 255, 0.06));
+  border-radius: $border-radius-md;
+}
+
+.miniCardBlock {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: $spacing-sm;
+}
+
+// Steps Component
+.steps {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  position: relative;
+  padding-left: $spacing-xl;
+
+  &::before {
+    content: '';
+    position: absolute;
+    left: 11px;
+    top: 24px;
+    bottom: 24px;
+    width: 2px;
+    background: var(--genui-border, rgba(255, 255, 255, 0.1));
+  }
+}
+
+.stepsItem {
+  position: relative;
+  padding: $spacing-md 0;
+
+  &::before {
+    content: '';
+    position: absolute;
+    left: -21px;
+    top: 18px;
+    width: 12px;
+    height: 12px;
+    background: var(--genui-primary, #6366f1);
+    border-radius: 50%;
+    border: 2px solid var(--color-background);
+  }
+
+  .stepsTitle {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--color-text-primary);
+    margin: 0 0 $spacing-xs 0;
+  }
+
+  .stepsDetails {
+    font-size: 13px;
+    color: var(--color-text-muted);
+  }
+}
+
+// SectionBlock Component
+.sectionBlock {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-sm;
+}
+
+.section {
+  border: 1px solid var(--genui-border, rgba(255, 255, 255, 0.08));
+  border-radius: $border-radius-md;
+  overflow: hidden;
+
+  &.expanded {
+    .sectionTrigger {
+      border-bottom: 1px solid var(--genui-border, rgba(255, 255, 255, 0.08));
+    }
+  }
+}
+
+.sectionTrigger {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: $spacing-md $spacing-lg;
+  background: rgba(255, 255, 255, 0.02);
+  border: none;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--color-text-primary);
+  cursor: pointer;
+  transition: background 0.15s ease;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.04);
+  }
+
+  .triggerIcon {
+    transition: transform 0.2s ease;
+
+    &.rotated {
+      transform: rotate(180deg);
+    }
+  }
+}
+
+.sectionContent {
+  padding: $spacing-lg;
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-md;
+}
+
+// Icon Component (Lucide icons mapping)
+.icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
