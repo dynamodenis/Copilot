@@ -94,7 +94,7 @@ export const useLeverageLoopsStore = create<LeverageLoopsStore>()(devtools((set)
         'Authorization': `Bearer ${token}`,
         'x-data-source': dataSource
       };
-      const response = await fetch(`${baseUrl}/my-persons`, { headers });
+      const response = await fetch(`${baseUrl}:Et3oQAtI/my-persons`, { headers });
       
       const data = await response.json();
       
@@ -121,7 +121,7 @@ export const useLeverageLoopsStore = create<LeverageLoopsStore>()(devtools((set)
         'Authorization': `Bearer ${token}`,
         'x-data-source': dataSource
       };
-      const response = await fetch(`${baseUrl}/suggestion-requests?copilot_mode=loop`, { headers });
+      const response = await fetch(`${baseUrl}:MkA4QsNh/suggestion-requests?copilot_mode=loop`, { headers });
       
       const data = await response.json();
       
