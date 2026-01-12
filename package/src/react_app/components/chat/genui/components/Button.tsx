@@ -30,7 +30,6 @@ export const Button: React.FC<ButtonProps> = ({
     submitKeywords.some(keyword => nameStr.includes(keyword)) ||
     submitKeywords.some(keyword => childrenStr.includes(keyword));
 
-  console.log('Button render:', { name, children, isSubmitButton, hasOnAction: !!onAction });
 
   return (
     <button

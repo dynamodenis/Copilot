@@ -11,7 +11,7 @@ import styles from "../CopilotChat.module.scss";
 const API_BASE_URL = import.meta.env.VITE_LLM_ENDPOINT || "http://localhost:3001";
 
 // Generate unique IDs
-const generateId = () => `msg-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+export const generateId = () => `msg-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
 
 interface SectionChatProps {
   context: ChatContext;
@@ -169,8 +169,14 @@ export const SectionChat: React.FC<SectionChatProps> = ({
     switch (event.type) {
       case "continue_conversation":
         if (event.params) {
-          const { humanFriendlyMessage, llmFriendlyMessage } = event.params;
-          if (humanFriendlyMessage && llmFriendlyMessage) {
+          const { humanFriendlyMessage, llmFriendlyMessage, prompt } = event.params;
+          
+          // If prompt is provided, send it directly to the LLM
+          if (prompt) {
+            sendMessage(prompt as string);
+          }
+          // Otherwise use the modal flow with human/llm friendly messages
+          else if (humanFriendlyMessage && llmFriendlyMessage) {
             setPendingAction({
               humanFriendlyMessage: humanFriendlyMessage as string,
               llmFriendlyMessage: llmFriendlyMessage as string,

@@ -309,10 +309,8 @@ export const Form: React.FC<FormRendererProps> = ({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('Form submitted:', { name, formData });
     if (onAction) {
       const action: ActionProps = { type: 'submit_form', props: { formName: name, formData } };
-      console.log('Calling onAction with:', action, formData);
       onAction(action, formData);
     } else {
       console.warn('Form onAction is not defined');

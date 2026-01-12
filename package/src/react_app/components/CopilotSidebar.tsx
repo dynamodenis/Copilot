@@ -4,7 +4,9 @@ import styles from "./CopilotSidebar.module.scss";
 import { LeverageLoopContent } from "./shared";
 
 import { useLeverageLoopsStore, type LeverageLoopPerson, type SuggestionRequest } from "@/react_app/store/leverageLoopsStore";
-import { useChatContextStore } from "@/react_app/store/chatContextStore";
+import { useChatContextStore, type ChatMessageType } from "@/react_app/store/chatContextStore";
+import { generateId } from "./chat/SectionChat";
+import { leverageLoopInitialSectionContentPrompt } from "./ContentPrompts";
 
 import OrbiterLogo from "@/react_app/assets/sidebar/Orbiter logo.svg";
 import OutcomesLogo from "@/react_app/assets/sidebar/target-arrow.svg";
@@ -37,13 +39,15 @@ export const CopilotSidebar: React.FC<CopilotSidebarProps> = ({
     selectedPerson, 
     selectedSuggestionRequest, 
     setSelectedPerson, 
-    setSelectedSuggestionRequest 
+    setSelectedSuggestionRequest,
+    addMessage,
   } = useChatContextStore(
     useShallow((state) => ({
       selectedPerson: state.selectedPerson,
       selectedSuggestionRequest: state.selectedSuggestionRequest,
       setSelectedPerson: state.setSelectedPerson,
       setSelectedSuggestionRequest: state.setSelectedSuggestionRequest,
+      addMessage: state.addMessage,
     }))
   );
 
@@ -66,6 +70,23 @@ export const CopilotSidebar: React.FC<CopilotSidebarProps> = ({
     setSelectedPerson(item);
     // Navigate to leverage-loops chat
     onSectionChange("leverage-loops");
+
+    const context = "leverage-loops";
+    const responseId = generateId();
+  
+
+    // Wrap in thesys content tag
+    const content = `<content thesys="true">${JSON.stringify(leverageLoopInitialSectionContentPrompt(item))}</content>`;
+
+    const assistantMessage: ChatMessageType = {
+      id: responseId,
+      role: "assistant",
+      content: content,
+      timestamp: new Date(),
+      isStreaming: false,
+    };
+
+    addMessage(context, assistantMessage);
   };
 
   const handleSuggestionRequestSelect = (suggestionRequest: SuggestionRequest) => {
