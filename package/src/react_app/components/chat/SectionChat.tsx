@@ -5,6 +5,7 @@ import { ChatMessage } from "./ChatMessage";
 import { EditPromptModal } from "./EditPromptModal";
 import type { PendingAction, ActionEvent } from "./types";
 import { useChatContextStore, type ChatContext, type ChatMessageType } from "@/react_app/store/chatContextStore";
+import { useLeverageLoopsStore } from "@/react_app/store/leverageLoopsStore";
 import styles from "../CopilotChat.module.scss";
 
 // Get API URL from environment variable, with fallback for development
@@ -208,6 +209,30 @@ export const SectionChat: React.FC<SectionChatProps> = ({
           
           console.log("Sending form data to LLM:", message);
           sendMessage(message);
+        }
+        break;
+
+      case "create_suggestion_request":
+        // Handle suggestion request creation
+        if (event.params) {
+          const { personName, personTitle, companyName } = event.params;
+          
+          // Create the suggestion request via the store
+          const suggestionRequest = {
+            request_panel_title: `Suggestion Request for ${personName}`,
+            request_header_title: `People to introduce to ${personName}`,
+            request_context: `Find people from my network to introduce to ${personName}, who is ${personTitle} at ${companyName}`,
+            status: "draft" as const,
+            user_id: 3,
+            copilot_mode: "loop",
+          };
+                    
+          // Call the store action
+          useLeverageLoopsStore.getState().createSuggestionRequest(suggestionRequest);
+          // Also send the prompt to LLM for suggestions
+          // if (prompt) {
+          //   sendMessage(prompt as string);
+          // }
         }
         break;
 

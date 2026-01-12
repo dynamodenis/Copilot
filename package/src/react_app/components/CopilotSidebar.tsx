@@ -6,7 +6,7 @@ import { LeverageLoopContent } from "./shared";
 import { useLeverageLoopsStore, type LeverageLoopPerson, type SuggestionRequest } from "@/react_app/store/leverageLoopsStore";
 import { useChatContextStore, type ChatMessageType } from "@/react_app/store/chatContextStore";
 import { generateId } from "./chat/SectionChat";
-import { leverageLoopInitialSectionContentPrompt } from "./ContentPrompts";
+import { leverageLoopInitialSectionContentPrompt } from "./leverage_loop/LeverageLoopChatContent";
 
 import OrbiterLogo from "@/react_app/assets/sidebar/Orbiter logo.svg";
 import OutcomesLogo from "@/react_app/assets/sidebar/target-arrow.svg";
@@ -24,13 +24,11 @@ export const CopilotSidebar: React.FC<CopilotSidebarProps> = ({
   onSectionChange,
 }) => {
   // Leverage loops data store
-  const { leverageLoops: _leverageLoops, fetchNetworkPersons, fetchSuggestionRequests, isLoading: _isLoading, error: _error } = useLeverageLoopsStore(
+  const { leverageLoops: _leverageLoops, fetchNetworkPersons, fetchSuggestionRequests } = useLeverageLoopsStore(
     useShallow((state) => ({
       leverageLoops: state.leverageLoops,
       fetchNetworkPersons: state.fetchNetworkPersons,
       fetchSuggestionRequests: state.fetchSuggestionRequests,
-      isLoading: state.isLoading,
-      error: state.error,
     }))
   );
 
@@ -179,8 +177,6 @@ export const CopilotSidebar: React.FC<CopilotSidebarProps> = ({
               selectedSuggestionRequest={selectedSuggestionRequest}   
               onItemSelect={handleItemSelect}
               onSuggestionRequestSelect={handleSuggestionRequestSelect}
-              isLoading={_isLoading}
-              error={_error}
             />
           )}
         </div>

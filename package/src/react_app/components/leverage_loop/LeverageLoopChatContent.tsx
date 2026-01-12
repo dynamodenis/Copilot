@@ -32,8 +32,12 @@ export const leverageLoopInitialSectionContentPrompt = (person: LeverageLoopPers
                     children: "Suggest people to introduce to " + person.full_name,
                     variant: "secondary",
                     action: {
-                      type: "continue_conversation",
+                      type: "create_suggestion_request",
                       props: {
+                        personId: person.id,
+                        personName: person.full_name,
+                        personTitle: person.master_person?.current_title || 'a professional',
+                        companyName: person.master_person?.master_company?.company_name || 'their company',
                         prompt: `Please suggest people from my network that I should introduce to ${person.full_name}. Consider their role as ${person.master_person?.current_title || 'a professional'} at ${person.master_person?.master_company?.company_name || 'their company'} and identify connections who could provide mutual value.`
                       }
                     }
