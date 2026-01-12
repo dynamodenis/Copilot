@@ -5,7 +5,7 @@ import { ChatMessage } from "./ChatMessage";
 import { EditPromptModal } from "./EditPromptModal";
 import type { PendingAction, ActionEvent } from "./types";
 import { useChatContextStore, type ChatContext, type ChatMessageType } from "@/react_app/store/chatContextStore";
-import { useLeverageLoopsStore } from "@/react_app/store/leverageLoopsStore";
+import { createSectionChatActionHandler } from "./SectionChatActions";
 import styles from "../CopilotChat.module.scss";
 
 // Get API URL from environment variable, with fallback for development
@@ -164,82 +164,20 @@ export const SectionChat: React.FC<SectionChatProps> = ({
   /**
    * Handle actions from custom components (forms, buttons, etc.)
    */
-  const handleAction = useCallback((event: ActionEvent) => {
-    console.log("Action received:", event);
-
-    switch (event.type) {
-      case "continue_conversation":
-        if (event.params) {
-          const { humanFriendlyMessage, llmFriendlyMessage, prompt } = event.params;
-          
-          // If prompt is provided, send it directly to the LLM
-          if (prompt) {
-            sendMessage(prompt as string);
-          }
-          // Otherwise use the modal flow with human/llm friendly messages
-          else if (humanFriendlyMessage && llmFriendlyMessage) {
-            setPendingAction({
-              humanFriendlyMessage: humanFriendlyMessage as string,
-              llmFriendlyMessage: llmFriendlyMessage as string,
-            });
-            setIsModalOpen(true);
-          }
-        }
-        break;
-
-      case "open_url":
-        if (event.params?.url) {
-          window.open(event.params.url as string, "_blank", "noopener,noreferrer");
-        }
-        break;
-
-      case "submit_form":
-        // Handle form submission - format form data and send to LLM
-        if (event.params?.formData) {
-          const formData = event.params.formData as Record<string, unknown>;
-          const formName = event.params.formName as string || 'form';
-          
-          // Format form data as a readable message for the LLM
-          const formEntries = Object.entries(formData)
-            .filter(([_, value]) => value !== undefined && value !== '')
-            .map(([key, value]) => `${key.replace(/_/g, ' ')}: ${value}`)
-            .join('\n');
-          
-          const message = `Form submitted: ${formName}\n\n${formEntries}`;
-          
-          console.log("Sending form data to LLM:", message);
-          sendMessage(message);
-        }
-        break;
-
-      case "create_suggestion_request":
-        // Handle suggestion request creation
-        if (event.params) {
-          const { personName, personTitle, companyName } = event.params;
-          
-          // Create the suggestion request via the store
-          const suggestionRequest = {
-            request_panel_title: `Suggestion Request for ${personName}`,
-            request_header_title: `People to introduce to ${personName}`,
-            request_context: `Find people from my network to introduce to ${personName}, who is ${personTitle} at ${companyName}`,
-            status: "draft" as const,
-            user_id: 3,
-            copilot_mode: "loop",
-          };
-                    
-          // Call the store action
-          useLeverageLoopsStore.getState().createSuggestionRequest(suggestionRequest);
-          // Also send the prompt to LLM for suggestions
-          // if (prompt) {
-          //   sendMessage(prompt as string);
-          // }
-        }
-        break;
-
-      default:
-        console.log("Unhandled action type:", event.type);
-    }
-  }, [sendMessage]);
+  const handleAction = useCallback(
+    (event: ActionEvent) => {
+      const handler = createSectionChatActionHandler({
+        sendMessage,
+        setPendingAction,
+        setIsModalOpen,
+        context,
+        addMessage,
+        updateMessage,
+      });
+      handler(event);
+    },
+    [sendMessage, setPendingAction, setIsModalOpen, context, addMessage, updateMessage]
+  );
 
   /**
    * Handle message update (for state persistence)

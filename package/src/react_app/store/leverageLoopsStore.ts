@@ -164,9 +164,7 @@ export const useLeverageLoopsStore = create<LeverageLoopsStore>()(devtools((set,
         'Authorization': `Bearer ${token}`,
         'x-data-source': dataSource
       };
-  
-      console.log("Creating suggestion request:", suggestionRequest);
-      
+        
       const response = await fetch(`${baseUrl}:MkA4QsNh/suggestion-requests`, 
         { headers, method: 'POST', body: JSON.stringify(suggestionRequest) }
       );
@@ -181,7 +179,6 @@ export const useLeverageLoopsStore = create<LeverageLoopsStore>()(devtools((set,
 
       set({ suggestionRequests: [...get().suggestionRequests, data], isCreatingSuggestionRequest: false });
     } catch (error) {
-      console.error("Create suggestion request error:", error);
       set({
         createSuggestionRequestError: error instanceof Error ? error.message : 'Unknown error',
         isCreatingSuggestionRequest: false
