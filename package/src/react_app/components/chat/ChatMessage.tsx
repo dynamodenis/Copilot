@@ -2,10 +2,12 @@ import React, { useMemo, useCallback } from "react";
 import styles from "./ChatMessage.module.scss";
 import type { ChatMessage as ChatMessageType, ActionEvent } from "./types";
 import { 
-  GenUIRenderer, 
+  GenUIRenderer,
+  StreamingGenUIRenderer,
   parseGenUIResponse, 
   isGenUIContent, 
   extractPlainText,
+  parseStreamingGenUI,
   type ActionProps,
 } from "./genui";
 
@@ -33,10 +35,21 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
     return message.content ? isGenUIContent(message.content) : false;
   }, [message.content]);
 
-  // Parse GenUI response from message content (only when not streaming)
+  // Parse GenUI response from message content
+  // During streaming, try to parse incrementally
   const genUIData = useMemo(() => {
-    if (!message.content || message.isStreaming) return null;
+    if (!message.content) return null;
+    
     if (hasGenUIContent) {
+      // If streaming, try incremental parsing
+      if (message.isStreaming) {
+        const streamingResult = parseStreamingGenUI(message.content);
+        if (streamingResult?.component) {
+          return streamingResult;
+        }
+        return null;
+      }
+      // If not streaming, use full parser
       return parseGenUIResponse(message.content);
     }
     return null;
@@ -69,26 +82,23 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
 
   // Render assistant content with GenUI support
   const renderAssistantContent = () => {
-    // If streaming GenUI content, show loading indicator instead of raw markup
-    if (message.isStreaming && hasGenUIContent) {
+    // If we have GenUI content (streaming or complete), use streaming renderer
+    if (hasGenUIContent) {
       return (
         <>
           {plainTextBefore && (
             <div className={styles.textContent}>{plainTextBefore}</div>
           )}
-          <div className={styles.genUILoading}>
-            <div className={styles.streamingIndicator}>
-              <span></span>
-              <span></span>
-              <span></span>
-            </div>
-            <span>Generating interface...</span>
-          </div>
+          <StreamingGenUIRenderer
+            content={message.content}
+            isStreaming={message.isStreaming || false}
+            onAction={handleGenUIAction}
+          />
         </>
       );
     }
 
-    // If we have parsed GenUI data, render it
+    // If we have parsed GenUI data (non-streaming), render it
     if (genUIData?.component) {
       return (
         <>

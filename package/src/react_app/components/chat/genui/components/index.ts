@@ -21,4 +21,8 @@ export {
   CheckBoxGroup,
   DatePicker,
 } from './Form';
+export { RadioItem } from './RadioItem';
+export type { RadioItemProps } from './RadioItem';
+export { CheckBoxItem } from './CheckboxItem';
+export type { CheckBoxItemProps } from './CheckboxItem';
 

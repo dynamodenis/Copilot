@@ -66,8 +66,15 @@ export function parseGenUIResponse(content: string): GenUIResponse | null {
  * Check if content contains GenUI components
  */
 export function isGenUIContent(content: string): boolean {
-  return content.includes('<content thesys="true">') || 
-         (content.trim().startsWith('{') && content.includes('"component"'));
+  // Check for Thesys wrapper tag (even if incomplete)
+  if (content.includes('<content thesys="true">')) {
+    return true;
+  }
+  // Check for raw JSON with component structure
+  if (content.trim().startsWith('{') && content.includes('"component"')) {
+    return true;
+  }
+  return false;
 }
 
 /**

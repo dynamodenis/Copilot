@@ -7,6 +7,11 @@ interface CardRendererProps extends CardProps {
 }
 
 export const Card: React.FC<CardRendererProps> = ({ children, renderComponent }) => {
+  // Handle missing or undefined children gracefully (during streaming, children may not be available yet)
+  if (!children || !Array.isArray(children)) {
+    return <div className={styles.card}></div>;
+  }
+
   return (
     <div className={styles.card}>
       {children.map((child, index) => (

@@ -35,11 +35,13 @@ export const DEFAULT_COMPONENT_WHITELIST: Record<string, ComponentConfig> = {
   TextArea: { allowed: true, description: "Multi-line text area" },
   Checkbox: { allowed: true, description: "Single checkbox" },
   
-  // Disabled by default (can be enabled if needed)
+  // Form Components (advanced)
   Select: { allowed: false, description: "Dropdown select (often unnecessary)" },
-  RadioGroup: { allowed: true, description: "Radio button group" },
-  CheckBoxGroup: { allowed: true, description: "Checkbox group" },
-  DatePicker: { allowed: true, description: "Date picker" },
+  RadioGroup: { allowed: false, description: "Radio button group for single selection" },
+  RadioItem: { allowed: true, description: "Individual radio button item" },
+  CheckBoxGroup: { allowed: false, description: "Checkbox group for multiple selection" },
+  CheckBoxItem: { allowed: true, description: "Individual checkbox item" },
+  DatePicker: { allowed: true, description: "Date picker input" },
   
   // Advanced Layout Components
   Stats: { allowed: true, description: "Number with label" },
