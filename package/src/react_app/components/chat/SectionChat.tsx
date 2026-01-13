@@ -6,10 +6,12 @@ import { EditPromptModal } from "./EditPromptModal";
 import type { PendingAction, ActionEvent } from "./types";
 import { useChatContextStore, type ChatContext, type ChatMessageType } from "@/react_app/store/chatContextStore";
 import { createSectionChatActionHandler } from "./SectionChatActions";
+import { getComponentInstruction } from "./genui/componentConfig";
 import styles from "../CopilotChat.module.scss";
 
 // Get API URL from environment variable, with fallback for development
 const API_BASE_URL = import.meta.env.VITE_LLM_ENDPOINT || "http://localhost:3001";
+console.log("API_BASE_URL", API_BASE_URL);
 
 // Generate unique IDs
 export const generateId = () => `msg-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
@@ -99,10 +101,10 @@ export const SectionChat: React.FC<SectionChatProps> = ({
       addMessage(context, assistantMessage);
 
       try {
-        // Build the prompt with system context if provided
-        const promptContent = systemPrompt 
-          ? `[Context: ${systemPrompt}]\n\n${content.trim()}`
-          : content.trim();
+        // Build the prompt with system context and component restrictions
+        const componentRestriction = getComponentInstruction();
+        const basePrompt = systemPrompt || "You are a helpful AI assistant.";
+        const promptContent = `${basePrompt}\n\n${componentRestriction}\n\nUser: ${content.trim()}`;
 
         const response = await fetch(`${API_BASE_URL}/api/chat`, {
           method: "POST",
