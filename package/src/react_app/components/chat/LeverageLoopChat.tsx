@@ -57,12 +57,15 @@ export const LeverageLoopChat: React.FC = () => {
   }
 
   return (
-    <SectionChat
-      context="leverage-loops"
-      title="Leverage Loops"
-      subtitle={getSubtitle()}
-      systemPrompt={getSystemPrompt()}
-    />
+    <>
+      <SectionChat
+        context="leverage-loops"
+        title="Leverage Loops"
+        subtitle={getSubtitle()}
+        systemPrompt={getSystemPrompt()}
+      />
+    </>
+    
   );
 };
 

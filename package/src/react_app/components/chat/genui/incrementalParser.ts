@@ -42,11 +42,16 @@ export function extractComponentsIncrementally(jsonString: string): ParsedCompon
     const componentName = match[1];
     const propsStr = match[2];
     
+    // Skip if component name is missing
+    if (!componentName) {
+      continue;
+    }
+    
     // Try to parse props
     let props: Record<string, unknown> = {};
     try {
       // If props string is not empty, try to parse it
-      if (propsStr.trim()) {
+      if (propsStr && propsStr.trim()) {
         // Check if props string looks complete (has closing brace or is at end)
         const propsMatch = decoded.substring(match.index).match(/"props"\s*:\s*\{([\s\S]*?)(\}|$)/);
         if (propsMatch) {
@@ -64,7 +69,7 @@ export function extractComponentsIncrementally(jsonString: string): ParsedCompon
     components.push({
       component: componentName,
       props,
-      isComplete: propsStr.includes('}') || decoded.indexOf('</content>', match.index) !== -1,
+      isComplete: propsStr ? (propsStr.includes('}') || decoded.indexOf('</content>', match.index) !== -1) : false,
     });
   }
   
@@ -78,7 +83,7 @@ export function extractComponentsIncrementally(jsonString: string): ParsedCompon
       const depth = (beforeMatch.match(/\{/g) || []).length - (beforeMatch.match(/\}/g) || []).length;
       
       // If depth is 2 or more, this is likely an inner component
-      if (depth >= 2) {
+      if (depth >= 2 && match[1]) {
         components.push({
           component: match[1],
           props: {},
@@ -140,7 +145,7 @@ export function parseStreamingGenUIAggressive(content: string): {
     }
     
     // The first component is usually the root (Card, etc.)
-    const rootComponent = components[0];
+    const rootComponent = components[0] || null;
     const childComponents = components.slice(1);
     
     return { rootComponent, childComponents };

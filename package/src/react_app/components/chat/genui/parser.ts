@@ -41,7 +41,7 @@ export function parseGenUIResponse(content: string): GenUIResponse | null {
     // Check if content contains thesys wrapper
     const thesysMatch = content.match(/<content\s+thesys="true">([\s\S]*?)<\/content>/);
     
-    if (thesysMatch) {
+    if (thesysMatch && thesysMatch[1]) {
       const jsonString = decodeHtmlEntities(thesysMatch[1].trim());
       const parsed = JSON.parse(jsonString) as GenUIResponse;
       return parsed;

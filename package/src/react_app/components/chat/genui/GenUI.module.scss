@@ -26,14 +26,14 @@ $spacing-xl: 24px;
 .header {
   .headerTitle {
     margin: 0 0 $spacing-xs 0;
-    font-size: 18px;
+    // font-size: 18px;
     font-weight: 600;
     color: var(--color-text-primary);
   }
 
   .headerSubtitle {
     margin: 0;
-    font-size: 13px;
+    // font-size: 13px;
     color: var(--color-text-muted);
   }
 }
@@ -74,7 +74,7 @@ $spacing-xl: 24px;
   gap: $spacing-sm;
   padding: 10px 16px;
   border-radius: $border-radius-sm;
-  font-size: 14px;
+  font-size: 12px;
   font-weight: 500;
   cursor: pointer;
   transition: all 0.15s ease;

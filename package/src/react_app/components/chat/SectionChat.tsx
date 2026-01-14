@@ -7,6 +7,7 @@ import type { PendingAction, ActionEvent } from "./types";
 import { useChatContextStore, type ChatContext, type ChatMessageType } from "@/react_app/store/chatContextStore";
 import { createSectionChatActionHandler } from "./SectionChatActions";
 import { getComponentInstruction } from "./genui/componentConfig";
+import { LeverageLoopSummary } from "../leverage_loop/LeverageLoopChatSummary";
 import styles from "../CopilotChat.module.scss";
 
 // Get API URL from environment variable, with fallback for development
@@ -15,6 +16,7 @@ console.log("API_BASE_URL", API_BASE_URL);
 
 // Generate unique IDs
 export const generateId = () => `msg-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+
 
 interface SectionChatProps {
   context: ChatContext;
@@ -57,7 +59,10 @@ export const SectionChat: React.FC<SectionChatProps> = ({
   );
 
   const { messages, threadId, isLoading } = chatState;
-
+  
+  // Leverage loop summary card should show if there are messages and no person or suggestion request is selected
+  const shouldShowLeverageLoopSummaryCard = context === "leverage-loops" && messages.length > 0 ;
+  
   // Modal state for editing form submissions
   const [isModalOpen, setIsModalOpen] = React.useState(false);
   const [pendingAction, setPendingAction] = React.useState<PendingAction | null>(null);
@@ -218,6 +223,13 @@ export const SectionChat: React.FC<SectionChatProps> = ({
         <h1>{title}</h1>
         {subtitle && <p className={styles.subtitle}>{subtitle}</p>}
       </div>
+
+      {shouldShowLeverageLoopSummaryCard && (
+        <LeverageLoopSummary
+          onSendMessage={sendMessage}
+          isLoading={isLoading}
+        />
+      )}
 
       {/* Messages */}
       <div className={styles.messagesContainer}>
