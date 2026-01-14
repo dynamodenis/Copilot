@@ -18,6 +18,12 @@ export interface ChatMessageType {
   isStreaming?: boolean;
 }
 
+export interface ChatSummaryType {
+  id: string;
+  content: string;
+  timestamp: Date;
+}
+
 interface ChatContextStore {
   // Current active chat context
   activeContext: ChatContext;
@@ -25,6 +31,7 @@ interface ChatContextStore {
   // Selected items for leverage loops
   selectedPerson: LeverageLoopPerson | null;
   selectedSuggestionRequest: SuggestionRequest | null;
+  leverageLoopSummaries: ChatSummaryType[];
   
   // Separate chat states for each context
   copilotChat: ChatState;
@@ -35,7 +42,8 @@ interface ChatContextStore {
   setActiveContext: (context: ChatContext) => void;
   setSelectedPerson: (person: LeverageLoopPerson | null) => void;
   setSelectedSuggestionRequest: (request: SuggestionRequest | null) => void;
-  
+  upsertLeverageLoopSummary: (summary: ChatSummaryType) => void;
+
   // Chat state actions
   addMessage: (context: ChatContext, message: ChatMessageType) => void;
   updateMessage: (context: ChatContext, messageId: string, content: string, isStreaming?: boolean) => void;
@@ -112,6 +120,21 @@ export const useChatContextStore = create<ChatContextStore>()(
       return {
         [chatKey]: createInitialChatState(context),
       };
+    }),
+
+    upsertLeverageLoopSummary: (summary) => set((state) => {
+      const existingIndex = state.leverageLoopSummaries.findIndex((s) => s.id === summary.id);
+      if (existingIndex >= 0) {
+        // Update existing summary
+        return {
+          leverageLoopSummaries: state.leverageLoopSummaries.map((s) => s.id === summary.id ? summary : s),
+        };
+      } else {
+        // Add new summary
+        return {
+          leverageLoopSummaries: [...state.leverageLoopSummaries, summary],
+        };
+      }
     }),
   }))
 );

@@ -2,6 +2,7 @@ import { useState } from "react";
 import { CopilotSidebar, type SidebarSection } from "./CopilotSidebar";
 import { CopilotMainChat, OutcomesChat, LeverageLoopChat } from "./chat";
 import styles from "./CopilotApp.module.scss";
+import "../index.css";
 
 interface CopilotAppProps {
   agentName?: string;

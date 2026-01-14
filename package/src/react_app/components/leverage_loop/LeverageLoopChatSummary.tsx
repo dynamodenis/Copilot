@@ -14,16 +14,20 @@ export const LeverageLoopSummary: React.FC<LeverageLoopSummaryProps> = ({
 }) => {
   const [summaryInput, setSummaryInput] = useState("");
 
-  const { selectedPerson, selectedSuggestionRequest } = useChatContextStore(
+  const { selectedPerson, selectedSuggestionRequest, leverageLoopSummaries, upsertLeverageLoopSummary } = useChatContextStore(
     useShallow((state) => ({
       selectedPerson: state.selectedPerson,
       selectedSuggestionRequest: state.selectedSuggestionRequest,
+      leverageLoopSummaries: state.leverageLoopSummaries,
+      upsertLeverageLoopSummary: state.upsertLeverageLoopSummary,
     }))
   );
 
+  console.log("leverageLoopSummaries", leverageLoopSummaries);
+
   const getTitle = () => {
     if (selectedPerson) {
-      return `Levergae loop summary for${selectedPerson.full_name}`;
+      return `Levergae loop summary for ${selectedPerson.full_name}`;
     }
     if (selectedSuggestionRequest) {
       return selectedSuggestionRequest.request_header_title;
@@ -35,6 +39,16 @@ export const LeverageLoopSummary: React.FC<LeverageLoopSummaryProps> = ({
     if (summaryInput.trim()) {
       onSendMessage(summaryInput.trim());
       setSummaryInput("");
+    }
+  };
+  const handleUpdateSummary = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    console.log("summaryInput", e.target.value);
+    setSummaryInput(e.target.value);
+    if(selectedPerson) {
+      upsertLeverageLoopSummary({ id: selectedPerson.full_name, content: e.target.value, timestamp: new Date() });
+    }
+    if(selectedSuggestionRequest) {
+      upsertLeverageLoopSummary({ id: selectedSuggestionRequest.request_header_title, content: e.target.value, timestamp: new Date() });
     }
   };
 
@@ -56,7 +70,7 @@ export const LeverageLoopSummary: React.FC<LeverageLoopSummaryProps> = ({
             className={styles.summaryTextarea}
             placeholder="Summary of what I can help you with..."
             value={summaryInput}
-            onChange={(e) => setSummaryInput(e.target.value)}
+            onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => handleUpdateSummary(e)}
             rows={2}
           />
         </div>

@@ -2591,7 +2591,12 @@ const rE = (f) => {
     }),
     clearChat: (p) => f(() => ({
       [_y(p)]: gy(p)
-    }))
+    })),
+    upsertLeverageLoopSummary: (p) => f((v) => v.leverageLoopSummaries.findIndex((b) => b.id === p.id) >= 0 ? {
+      leverageLoopSummaries: v.leverageLoopSummaries.map((b) => b.id === p.id ? p : b)
+    } : {
+      leverageLoopSummaries: [...v.leverageLoopSummaries, p]
+    })
   }))
 );
 function _y(f) {
@@ -4513,22 +4518,28 @@ ${M}`;
   onSendMessage: f,
   isLoading: p
 }) => {
-  const [v, S] = Be.useState(""), { selectedPerson: b, selectedSuggestionRequest: E } = wy(
-    sd((R) => ({
-      selectedPerson: R.selectedPerson,
-      selectedSuggestionRequest: R.selectedSuggestionRequest
+  const [v, S] = Be.useState(""), { selectedPerson: b, selectedSuggestionRequest: E, leverageLoopSummaries: m, upsertLeverageLoopSummary: T } = wy(
+    sd((F) => ({
+      selectedPerson: F.selectedPerson,
+      selectedSuggestionRequest: F.selectedSuggestionRequest,
+      leverageLoopSummaries: F.leverageLoopSummaries,
+      upsertLeverageLoopSummary: F.upsertLeverageLoopSummary
     }))
-  ), m = () => b ? `Levergae loop summary for${b.full_name}` : E ? E.request_header_title : "Leverage Loops", T = () => {
+  );
+  console.log("leverageLoopSummaries", m);
+  const R = () => b ? `Levergae loop summary for ${b.full_name}` : E ? E.request_header_title : "Leverage Loops", w = () => {
     v.trim() && (f(v.trim()), S(""));
+  }, M = (F) => {
+    console.log("summaryInput", F.target.value), S(F.target.value), b && T({ id: b.full_name, content: F.target.value, timestamp: /* @__PURE__ */ new Date() }), E && T({ id: E.request_header_title, content: F.target.value, timestamp: /* @__PURE__ */ new Date() });
   };
   return /* @__PURE__ */ D.jsx("div", { className: Kr.leverageLoopSummary, children: /* @__PURE__ */ D.jsxs("div", { className: Kr.summaryCard, children: [
     /* @__PURE__ */ D.jsxs("div", { className: Kr.summaryCardHeader, children: [
-      /* @__PURE__ */ D.jsx("p", { className: Kr.summaryCardTitle, children: m() }),
+      /* @__PURE__ */ D.jsx("p", { className: Kr.summaryCardTitle, children: R() }),
       /* @__PURE__ */ D.jsx(
         "button",
         {
           className: Kr.summaryCardButton,
-          onClick: T,
+          onClick: w,
           disabled: !v.trim() || p,
           children: /* @__PURE__ */ D.jsx("span", { className: Kr.playIcon, children: "▶" })
         }
@@ -4540,7 +4551,7 @@ ${M}`;
         className: Kr.summaryTextarea,
         placeholder: "Summary of what I can help you with...",
         value: v,
-        onChange: (R) => S(R.target.value),
+        onChange: (F) => M(F),
         rows: 2
       }
     ) })
