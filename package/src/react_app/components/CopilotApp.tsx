@@ -8,6 +8,9 @@ import styles from "./CopilotApp.module.scss";
 interface CopilotAppProps {
   agentName?: string;
   logoUrl?: string;
+  token?: string;
+  dataSource?: string;
+  baseUrl?: string;
 }
 
 export const CopilotApp: React.FC<CopilotAppProps> = ({
