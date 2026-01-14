@@ -1,12 +1,14 @@
 <template>
-  <CopilotApp />
+  <CopilotApp :token="token" :dataSource="dataSource" :baseUrl="baseUrl" />
 </template>
 
 <script>
 import { CopilotApp } from "../package/dist/orbiter-copilot";
-// import "../package/dist/orbiter-copilot.css";
+import "../package/dist/orbiter-copilot.css";
 
 export default {
+  name: "OrbiterCopilot",
+
   components: {
     CopilotApp,
   },

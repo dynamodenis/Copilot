@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useShallow } from "zustand/react/shallow";
 import { useChatContextStore } from "@/react_app/store/chatContextStore";
 import styles from "../CopilotChat.module.scss";
@@ -14,16 +14,50 @@ export const LeverageLoopSummary: React.FC<LeverageLoopSummaryProps> = ({
 }) => {
   const [summaryInput, setSummaryInput] = useState("");
 
-  const { selectedPerson, selectedSuggestionRequest, leverageLoopSummaries, upsertLeverageLoopSummary } = useChatContextStore(
+  const { selectedPerson, selectedSuggestionRequest, leverageLoopSummaries, upsertLeverageLoopSummary, leverageLoopsChat } = useChatContextStore(
     useShallow((state) => ({
       selectedPerson: state.selectedPerson,
       selectedSuggestionRequest: state.selectedSuggestionRequest,
       leverageLoopSummaries: state.leverageLoopSummaries,
       upsertLeverageLoopSummary: state.upsertLeverageLoopSummary,
+      leverageLoopsChat: state.leverageLoopsChat,
     }))
   );
 
-  console.log("leverageLoopSummaries", leverageLoopSummaries);
+  // Load existing summary when person or suggestion request changes, and concatenate user messages
+  useEffect(() => {
+    let summaryId: string | null = null;
+    
+    if (selectedPerson) {
+      summaryId = selectedPerson.full_name;
+    } else if (selectedSuggestionRequest) {
+      summaryId = selectedSuggestionRequest.request_header_title;
+    }
+    
+    if (summaryId) {
+      const existingSummary = leverageLoopSummaries.find((s) => s.id === summaryId);
+      const savedSummaryContent = existingSummary?.content || "";
+      
+      // Get user messages from leverage-loops chat
+      const userMessages = leverageLoopsChat.messages
+        .filter((msg) => msg.role === "user")
+        .map((msg) => msg.content.trim())
+        .filter((content) => content.length > 0);
+      
+      // Concatenate saved summary with user messages, separated by commas
+      const contentParts: string[] = [];
+      if (savedSummaryContent.trim()) {
+        contentParts.push(savedSummaryContent.trim());
+      }
+      contentParts.push(...userMessages);
+      
+      const combinedContent = contentParts.join(", ");
+      
+      setSummaryInput(combinedContent);
+    } else {
+      setSummaryInput("");
+    }
+  }, [selectedPerson, selectedSuggestionRequest, leverageLoopSummaries, leverageLoopsChat.messages]);
 
   const getTitle = () => {
     if (selectedPerson) {
@@ -42,7 +76,6 @@ export const LeverageLoopSummary: React.FC<LeverageLoopSummaryProps> = ({
     }
   };
   const handleUpdateSummary = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    console.log("summaryInput", e.target.value);
     setSummaryInput(e.target.value);
     if(selectedPerson) {
       upsertLeverageLoopSummary({ id: selectedPerson.full_name, content: e.target.value, timestamp: new Date() });

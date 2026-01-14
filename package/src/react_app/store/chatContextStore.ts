@@ -31,6 +31,7 @@ interface ChatContextStore {
   // Selected items for leverage loops
   selectedPerson: LeverageLoopPerson | null;
   selectedSuggestionRequest: SuggestionRequest | null;
+
   leverageLoopSummaries: ChatSummaryType[];
   
   // Separate chat states for each context
@@ -62,6 +63,7 @@ export const useChatContextStore = create<ChatContextStore>()(
     activeContext: "copilot",
     selectedPerson: null,
     selectedSuggestionRequest: null,
+    leverageLoopSummaries: [],
     
     copilotChat: createInitialChatState("copilot"),
     outcomesChat: createInitialChatState("outcomes"),

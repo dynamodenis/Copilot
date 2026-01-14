@@ -34,7 +34,7 @@ export const leverageLoopInitialSectionContentPrompt = (person: LeverageLoopPers
                     action: {
                       type: "create_suggestion_request",
                       props: {
-                        personId: person.id,
+                        masterPersonId: person.master_person_id,
                         personName: person.full_name,
                         personTitle: person.master_person?.current_title || 'a professional',
                         companyName: person.master_person?.master_company?.company_name || 'their company',

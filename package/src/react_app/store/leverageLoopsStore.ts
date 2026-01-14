@@ -57,6 +57,7 @@ export interface SuggestionRequest {
   status: "draft" | "suggestion"  | "processing" | "archived";
   leverage_loop_suggestions?: any[];
   leverage_loop_suggestion_count?: number;
+  master_person_id: number;
 }
 
 interface LeverageLoopsStore {
@@ -164,6 +165,8 @@ export const useLeverageLoopsStore = create<LeverageLoopsStore>()(devtools((set,
         'Authorization': `Bearer ${token}`,
         'x-data-source': dataSource
       };
+
+      console.log("suggestionRequest", suggestionRequest);
         
       const response = await fetch(`${baseUrl}:MkA4QsNh/suggestion-requests`, 
         { headers, method: 'POST', body: JSON.stringify(suggestionRequest) }
@@ -171,6 +174,8 @@ export const useLeverageLoopsStore = create<LeverageLoopsStore>()(devtools((set,
 
       // Parse the response body once
       const data = await response.json();
+
+      console.log("data SuggestionRequest", data);
 
       if (!response.ok) {
         const apiMessage = data?.message || data?.error || 'Failed to create suggestion request';

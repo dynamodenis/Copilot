@@ -7,10 +7,16 @@ import "../index.css";
 interface CopilotAppProps {
   agentName?: string;
   logoUrl?: string;
+  token?: string;
+  dataSource?: string;
+  baseUrl?: string;
 }
 
 export const CopilotApp: React.FC<CopilotAppProps> = ({
   agentName = "Copilot",
+  token,
+  dataSource,
+  baseUrl,
 }) => {
   const [activeSection, setActiveSection] = useState<SidebarSection>("copilot");
 

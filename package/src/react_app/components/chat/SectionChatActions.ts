@@ -73,7 +73,7 @@ export const createSectionChatActionHandler = (deps: ActionHandlerDependencies) 
 
       case "create_suggestion_request":
         if (event.params) {
-          const { personName, personTitle, companyName } = event.params;
+          const { personName, personTitle, companyName, masterPersonId } = event.params;
           const suggestionRequest = {
             request_panel_title: `Suggestion Request for ${personName}`,
             request_header_title: `People to introduce to ${personName}`,
@@ -81,6 +81,7 @@ export const createSectionChatActionHandler = (deps: ActionHandlerDependencies) 
             status: "suggestion" as const,
             user_id: 3,
             copilot_mode: "loop",
+            master_person_id: masterPersonId,
           };
           
           const loadingMessageId = generateId();

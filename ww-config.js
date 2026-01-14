@@ -4,4 +4,13 @@ export default {
       en: "Orbiter Copilot",
     },
   },
+
+  properties: {
+    token: {
+      label: { en: "Token" },
+      type: "string",
+      defaultValue: "",
+      bindable: true,
+    },
+  },
 };
