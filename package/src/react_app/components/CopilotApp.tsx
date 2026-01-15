@@ -14,9 +14,6 @@ interface CopilotAppProps {
 
 export const CopilotApp: React.FC<CopilotAppProps> = ({
   agentName = "Copilot",
-  token,
-  dataSource,
-  baseUrl,
 }) => {
   const [activeSection, setActiveSection] = useState<SidebarSection>("copilot");
 
