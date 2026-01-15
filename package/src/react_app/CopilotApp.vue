@@ -12,5 +12,10 @@ const CopilotAppVue = applyPureReactInVue(CopilotApp);
 </script>
 
 <template>
-  <CopilotAppVue :token="token" :dataSource="dataSource" :baseUrl="baseUrl" />
+  <CopilotAppVue
+    :token="token"
+    :dataSource="dataSource"
+    :baseUrl="baseUrl"
+    style="height: 100%; width: 100%"
+  />
 </template>
