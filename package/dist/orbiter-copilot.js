@@ -5067,7 +5067,7 @@ Type your response below and I'll help you plan the best approach.`
       systemPrompt: p()
     }
   ) });
-}, QL = "_app_rj7hb_1", KL = "_mainContent_rj7hb_11", sE = {
+}, QL = "_app_4u5b6_5", KL = "_mainContent_4u5b6_15", sE = {
   app: QL,
   mainContent: KL
 }, XL = ({
@@ -25214,7 +25214,8 @@ const VM = /* @__PURE__ */ BT({
     return (p, S) => (WT(), qT(YT(v), {
       token: c.token,
       dataSource: c.dataSource,
-      baseUrl: c.baseUrl
+      baseUrl: c.baseUrl,
+      style: { height: "100%", width: "100%" }
     }, null, 8, ["token", "dataSource", "baseUrl"]));
   }
 }), WM = {
