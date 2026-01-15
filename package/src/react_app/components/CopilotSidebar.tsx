@@ -17,11 +17,13 @@ export type SidebarSection = "copilot" | "outcomes" | "leverage-loops";
 interface CopilotSidebarProps {
   activeSection: SidebarSection;
   onSectionChange: (section: SidebarSection) => void;
+  onSectionChangeConfiguration: (section: SidebarSection) => void;
 }
 
 export const CopilotSidebar: React.FC<CopilotSidebarProps> = ({
   activeSection,
   onSectionChange,
+  onSectionChangeConfiguration,
 }) => {
   // Leverage loops data store
   const { leverageLoops: _leverageLoops, fetchNetworkPersons, fetchSuggestionRequests } = useLeverageLoopsStore(
@@ -53,10 +55,9 @@ export const CopilotSidebar: React.FC<CopilotSidebarProps> = ({
 
   const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set());
 
+
   const toggleSection = (sectionId: SidebarSection) => {
 
-    console.log("toggleSection", sectionId);
-    onSectionChange(sectionId);
     setExpandedSections((prev) => {
       const newSet = new Set(prev);
       if (newSet.has(sectionId)) {
@@ -162,7 +163,7 @@ export const CopilotSidebar: React.FC<CopilotSidebarProps> = ({
           <div className={`${styles.sectionHeader} ${activeSection === "leverage-loops" ? styles.active : ""}`}>
             <button
               className={styles.sidebarItemInHeader}
-              onClick={() => onSectionChange("leverage-loops")}
+              onClick={() => onSectionChangeConfiguration("leverage-loops")}
               aria-label="Leverage Loops"
             >
               <span className={styles.sidebarIcon}>

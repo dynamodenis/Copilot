@@ -1,5 +1,6 @@
 import type { ActionEvent, PendingAction } from "./types";
 import type { ChatContext, ChatMessageType } from "@/react_app/store/chatContextStore";
+import { useChatContextStore } from "@/react_app/store/chatContextStore";
 import { useLeverageLoopsStore } from "@/react_app/store/leverageLoopsStore";
 
 // Helper to wrap GenUI content
@@ -154,6 +155,13 @@ export const createSectionChatActionHandler = (deps: ActionHandlerDependencies) 
                   }
                 });
             updateMessage(context, loadingMessageId, content, false, chatKey as string | undefined);
+            
+            // On success, navigate back to default leverage loop view
+            if (!createSuggestionRequestError) {
+              const { setSelectedPerson, setSelectedSuggestionRequest } = useChatContextStore.getState();
+              setSelectedPerson(null);
+              setSelectedSuggestionRequest(null);
+            }
           });
         }
         break;

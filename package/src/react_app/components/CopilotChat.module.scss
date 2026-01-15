@@ -54,14 +54,31 @@
 }
 
 .emptyState {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  height: 100%;
+  padding: 16px 24px;
   color: var(--color-text-muted);
+  background: transparent;
 
   p {
+    margin: 0;
     font-size: 14px;
+    line-height: 1.5;
+  }
+}
+
+.emptyStateMessage {
+  padding: 16px 24px;
+  
+  p {
+    display: inline-block;
+    padding: 12px 16px;
+    margin: 0;
+    font-size: 14px;
+    line-height: 1.5;
+    color: var(--color-text-secondary);
+    // background: var(--genui-card-bg, rgba(255, 255, 255, 0.03));
+    // border: 1px solid var(--genui-border, rgba(255, 255, 255, 0.08));
+    // border-radius: 12px;
+    max-width: 80%;
   }
 }
 

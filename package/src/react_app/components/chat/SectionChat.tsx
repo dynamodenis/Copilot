@@ -42,6 +42,9 @@ export const SectionChat: React.FC<SectionChatProps> = ({
     addMessage,
     updateMessage,
     setIsLoading,
+    upsertLeverageLoopSummary,
+    selectedPerson,
+    selectedSuggestionRequest,
   } = useChatContextStore(
     useShallow((state) => {
       // For leverage-loops, use the keyed chat state based on current selection
@@ -51,6 +54,9 @@ export const SectionChat: React.FC<SectionChatProps> = ({
           addMessage: state.addMessage,
           updateMessage: state.updateMessage,
           setIsLoading: state.setIsLoading,
+          upsertLeverageLoopSummary: state.upsertLeverageLoopSummary,
+          selectedPerson: state.selectedPerson,
+          selectedSuggestionRequest: state.selectedSuggestionRequest,
         };
       }
       
@@ -60,9 +66,60 @@ export const SectionChat: React.FC<SectionChatProps> = ({
         addMessage: state.addMessage,
         updateMessage: state.updateMessage,
         setIsLoading: state.setIsLoading,
+        upsertLeverageLoopSummary: state.upsertLeverageLoopSummary,
+        selectedPerson: state.selectedPerson,
+        selectedSuggestionRequest: state.selectedSuggestionRequest,
       };
     })
   );
+
+  /**
+   * Extract summary from response content and return clean content
+   * Format: [SUMMARY]...[/SUMMARY]
+   * Also handles cases where LLM duplicates content after the summary
+   */
+  const extractSummary = useCallback((content: string): { cleanContent: string; summary: string | null } => {
+    const summaryMatch = content.match(/\[SUMMARY\]([\s\S]*?)\[\/SUMMARY\]/);
+    if (summaryMatch && summaryMatch[1]) {
+      const summary = summaryMatch[1].trim();
+      
+      // Remove the summary and everything after it (LLM sometimes duplicates content after summary)
+      // Find where the summary starts and keep only content before it
+      const summaryStartIndex = content.indexOf('[SUMMARY]');
+      let cleanContent = content.substring(0, summaryStartIndex).trim();
+      
+      // If we have nothing before the summary, try to get content after [/SUMMARY]
+      // but only if it doesn't look like a duplicate
+      if (!cleanContent) {
+        cleanContent = content.replace(/\[SUMMARY\][\s\S]*?\[\/SUMMARY\]/, '').trim();
+      }
+      
+      return { cleanContent, summary };
+    }
+    return { cleanContent: content, summary: null };
+  }, []);
+
+  /**
+   * Update leverage loop summary in the store
+   */
+  const updateLeverageLoopSummary = useCallback((summary: string) => {
+    if (context !== "leverage-loops") return;
+    
+    let summaryId: string | null = null;
+    if (selectedPerson) {
+      summaryId = selectedPerson.full_name;
+    } else if (selectedSuggestionRequest) {
+      summaryId = selectedSuggestionRequest.request_header_title;
+    }
+    
+    if (summaryId && summary) {
+      upsertLeverageLoopSummary({
+        id: summaryId,
+        content: summary,
+        timestamp: new Date(),
+      });
+    }
+  }, [context, selectedPerson, selectedSuggestionRequest, upsertLeverageLoopSummary]);
 
   const { messages, threadId, isLoading } = chatState;
   
@@ -151,13 +208,30 @@ export const SectionChat: React.FC<SectionChatProps> = ({
             const chunk = decoder.decode(value, { stream: true });
             accumulatedContent += chunk;
 
-            // Update message content as it streams
-            updateMessage(context, responseId, accumulatedContent, true);
+            // During streaming, hide [SUMMARY] tag content but keep the main content visible
+            // Only hide the summary section, not everything after it
+            let streamingContent = accumulatedContent;
+            
+            // If we detect a [SUMMARY] tag starting, hide it from display during streaming
+            const summaryStartIndex = streamingContent.indexOf('[SUMMARY]');
+            if (summaryStartIndex !== -1) {
+              streamingContent = streamingContent.substring(0, summaryStartIndex).trim();
+            }
+            
+            updateMessage(context, responseId, streamingContent, true);
           }
         }
 
-        // Mark streaming as complete
-        updateMessage(context, responseId, accumulatedContent, false);
+        // After streaming complete, extract summary and update store
+        const { cleanContent, summary } = extractSummary(accumulatedContent);
+        
+        // Update the summary store for leverage loops
+        if (summary && context === "leverage-loops") {
+          updateLeverageLoopSummary(summary);
+        }
+
+        // Mark streaming as complete with clean content (without summary tags)
+        updateMessage(context, responseId, cleanContent, false);
       } catch (error) {
         console.error("Failed to send message:", error);
         // Update message with error
@@ -171,7 +245,7 @@ export const SectionChat: React.FC<SectionChatProps> = ({
         setIsLoading(context, false);
       }
     },
-    [isLoading, threadId, context, systemPrompt, addMessage, updateMessage, setIsLoading]
+    [isLoading, threadId, context, systemPrompt, addMessage, updateMessage, setIsLoading, extractSummary, updateLeverageLoopSummary]
   );
 
   /**
@@ -272,4 +346,5 @@ export const SectionChat: React.FC<SectionChatProps> = ({
     </div>
   );
 };
+
 
