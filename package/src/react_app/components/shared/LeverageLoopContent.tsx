@@ -149,7 +149,7 @@ export const LeverageLoopContent: React.FC<LeverageLoopContentProps> = ({
   };
 
   const renderSuggestionRequest = (item: SuggestionRequest, isChild = false) => {
-    const isSelected = selectedSuggestionRequest?.request_header_title === item.request_header_title;
+    const isSelected = selectedSuggestionRequest?.id === item.id;
     return (
       <div key={item.id} className={styles.suggestionItemWrapper}>
         <button
@@ -159,8 +159,26 @@ export const LeverageLoopContent: React.FC<LeverageLoopContentProps> = ({
             onSuggestionRequestSelect(item);
           }}
         >
+          <div className={styles.personAvatar}>
+            {item.master_person?.avatar ? (
+              <img src={item.master_person.avatar} alt={item.master_person.name || "Person"} />
+            ) : (
+              <span className={styles.avatarPlaceholder}>
+                {item.master_person?.name?.charAt(0) || "?"}
+              </span>
+            )}
+          </div>
+          <div className={styles.personInfo}>
+            <span className={styles.personName}>{item.master_person?.name || item.request_header_title}</span>
+            {(item.master_person?.current_title || item.master_person?.company_name) && (
+              <span className={styles.personTitle}>
+                {item.master_person?.current_title}
+                {item.master_person?.current_title && item.master_person?.company_name && " at "}
+                {item.master_person?.company_name}
+              </span>
+            )}
+          </div>
           <StatusIcon status={item.status} />
-          <span className={styles.suggestionLabel}>{item.request_header_title}</span>
           <button className={styles.moreButton} onClick={(e) => e.stopPropagation()}>
             ⋮
           </button>

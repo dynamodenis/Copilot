@@ -34,6 +34,7 @@ export interface MasterPerson {
   orbiter_connect_request_sent: boolean;
   orbiter_connect_request_received: boolean;
   orbiter_connection: boolean;
+  company_name?: string;
 }
 
 export interface LeverageLoopPerson {
@@ -49,6 +50,8 @@ export interface LeverageLoopPerson {
 
 export interface SuggestionRequest {
   id?: number;
+  created_at?: number;
+  updated_at?: number | null;
   user_id?: number;
   copilot_mode?: string;
   request_panel_title: string;
@@ -57,7 +60,13 @@ export interface SuggestionRequest {
   status: "draft" | "suggestion"  | "processing" | "archived";
   leverage_loop_suggestions?: any[];
   leverage_loop_suggestion_count?: number;
+  outcome_suggestions?: any[];
+  outcome_plan_steps?: any[];
+  outcome_suggestion_count?: number;
+  parent_suggestion_context?: string | null;
   master_person_id: number;
+  // Person fields (populated from master_person)
+  master_person?: MasterPerson;
 }
 
 interface LeverageLoopsStore {
@@ -165,8 +174,6 @@ export const useLeverageLoopsStore = create<LeverageLoopsStore>()(devtools((set,
         'Authorization': `Bearer ${token}`,
         'x-data-source': dataSource
       };
-
-      console.log("suggestionRequest", suggestionRequest);
         
       const response = await fetch(`${baseUrl}:MkA4QsNh/suggestion-requests`, 
         { headers, method: 'POST', body: JSON.stringify(suggestionRequest) }
@@ -174,8 +181,6 @@ export const useLeverageLoopsStore = create<LeverageLoopsStore>()(devtools((set,
 
       // Parse the response body once
       const data = await response.json();
-
-      console.log("data SuggestionRequest", data);
 
       if (!response.ok) {
         const apiMessage = data?.message || data?.error || 'Failed to create suggestion request';
