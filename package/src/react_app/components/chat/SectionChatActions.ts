@@ -13,8 +13,8 @@ export interface ActionHandlerDependencies {
   setPendingAction: (action: PendingAction | null) => void;
   setIsModalOpen: (open: boolean) => void;
   context: ChatContext;
-  addMessage: (context: ChatContext, message: ChatMessageType) => void;
-  updateMessage: (context: ChatContext, messageId: string, content: string, isStreaming?: boolean) => void;
+  addMessage: (context: ChatContext, message: ChatMessageType, chatKey?: string) => void;
+  updateMessage: (context: ChatContext, messageId: string, content: string, isStreaming?: boolean, chatKey?: string) => void;
 }
 
 /**
@@ -71,9 +71,34 @@ export const createSectionChatActionHandler = (deps: ActionHandlerDependencies) 
         }
         break;
 
+      case "add_assistant_message":
+        // Add a static assistant message without calling the API
+        if (event.params?.content || event.params?.componentData) {
+          const messageId = generateId();
+          const chatKey = event.params.chatKey as string | undefined;
+          
+          // Support both raw content string or componentData object
+          let content: string;
+          if (event.params.componentData) {
+            // Wrap component data in thesys content tag
+            content = `<content thesys="true">${JSON.stringify(event.params.componentData)}</content>`;
+          } else {
+            content = event.params.content as string;
+          }
+          
+          addMessage(context, {
+            id: messageId,
+            role: "assistant",
+            content: content,
+            timestamp: new Date(),
+            isStreaming: false,
+          }, chatKey);
+        }
+        break;
+
       case "create_suggestion_request":
         if (event.params) {
-          const { personName, personTitle, companyName, masterPersonId } = event.params;
+          const { personName, personTitle, companyName, masterPersonId, chatKey } = event.params;
           const suggestionRequest = {
             request_panel_title: `Suggestion Request for ${personName}`,
             request_header_title: `People to introduce to ${personName}`,
@@ -81,7 +106,7 @@ export const createSectionChatActionHandler = (deps: ActionHandlerDependencies) 
             status: "suggestion" as const,
             user_id: 3,
             copilot_mode: "loop",
-            master_person_id: masterPersonId,
+            master_person_id: masterPersonId as number,
           };
           
           const loadingMessageId = generateId();
@@ -99,7 +124,7 @@ export const createSectionChatActionHandler = (deps: ActionHandlerDependencies) 
             }),
             timestamp: new Date(),
             isStreaming: false,
-          });
+          }, chatKey as string | undefined);
           
           useLeverageLoopsStore.getState().createSuggestionRequest(suggestionRequest).then(() => {
             const { createSuggestionRequestError } = useLeverageLoopsStore.getState();
@@ -128,7 +153,7 @@ export const createSectionChatActionHandler = (deps: ActionHandlerDependencies) 
                     ]
                   }
                 });
-            updateMessage(context, loadingMessageId, content, false);
+            updateMessage(context, loadingMessageId, content, false, chatKey as string | undefined);
           });
         }
         break;

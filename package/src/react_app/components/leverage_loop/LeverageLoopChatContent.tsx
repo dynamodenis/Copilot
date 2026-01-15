@@ -38,6 +38,7 @@ export const leverageLoopInitialSectionContentPrompt = (person: LeverageLoopPers
                         personName: person.full_name,
                         personTitle: person.master_person?.current_title || 'a professional',
                         companyName: person.master_person?.master_company?.company_name || 'their company',
+                        chatKey: person.full_name,
                         prompt: `Please suggest people from my network that I should introduce to ${person.full_name}. Consider their role as ${person.master_person?.current_title || 'a professional'} at ${person.master_person?.master_company?.company_name || 'their company'} and identify connections who could provide mutual value.`
                       }
                     }
@@ -49,9 +50,32 @@ export const leverageLoopInitialSectionContentPrompt = (person: LeverageLoopPers
                     children: "Help " + person.full_name + " with a specific task",
                     variant: "secondary",
                     action: {
-                      type: "continue_conversation",
+                      type: "add_assistant_message",
                       props: {
-                        prompt: `I want to help ${person.full_name} with a specific task. Based on their role as ${person.master_person?.current_title || 'a professional'} at ${person.master_person?.master_company?.company_name || 'their company'}, what are some ways I could provide value or assistance to them?`
+                        chatKey: person.full_name,
+                        componentData: {
+                          component: {
+                            component: "Card",
+                            props: {
+                              children: [
+                                // {
+                                //   component: "Header",
+                                //   props: {
+                                //     title: "How would you like to help " + person.full_name + "?",
+                                //     subtitle: (person.master_person?.current_title || '') + " · " + (person.master_person?.master_company?.company_name || '')
+                                //   }
+                                // },
+                                {
+                                  component: "TextContent",
+                                  props: {
+                                    textMarkdown: "Tell me what kind of assistance you'd like to provide to **" + person.full_name + "**. For example:\n\n- Make an introduction to someone in your network\n- Share relevant resources or information\n- Offer advice or expertise in a specific area\n- Connect them with an opportunity\n\nType your response below and I'll help you plan the best approach."
+                                  }
+                                }
+                              ]
+                            }
+                          },
+                          error: null
+                        }
                       }
                     }
                   }
