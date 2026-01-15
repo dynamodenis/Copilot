@@ -42,6 +42,9 @@ export const SectionChat: React.FC<SectionChatProps> = ({
     addMessage,
     updateMessage,
     setIsLoading,
+    upsertLeverageLoopSummary,
+    selectedPerson,
+    selectedSuggestionRequest,
   } = useChatContextStore(
     useShallow((state) => {
       // For leverage-loops, use the keyed chat state based on current selection
@@ -51,6 +54,9 @@ export const SectionChat: React.FC<SectionChatProps> = ({
           addMessage: state.addMessage,
           updateMessage: state.updateMessage,
           setIsLoading: state.setIsLoading,
+          upsertLeverageLoopSummary: state.upsertLeverageLoopSummary,
+          selectedPerson: state.selectedPerson,
+          selectedSuggestionRequest: state.selectedSuggestionRequest,
         };
       }
       
@@ -60,14 +66,70 @@ export const SectionChat: React.FC<SectionChatProps> = ({
         addMessage: state.addMessage,
         updateMessage: state.updateMessage,
         setIsLoading: state.setIsLoading,
+        upsertLeverageLoopSummary: state.upsertLeverageLoopSummary,
+        selectedPerson: state.selectedPerson,
+        selectedSuggestionRequest: state.selectedSuggestionRequest,
       };
     })
   );
 
+
+  function cleanDocumentContent(rawContent: string) {
+    // Extract the SUMMARY section
+
+      const summaryMatch = rawContent.match(/\[SUMMARY\](.*?)\[\/SUMMARY\]/s);
+      let summary = null;
+      if (summaryMatch && summaryMatch[1]) {
+        summary = summaryMatch[1].trim();
+        // Remove the SUMMARY section and everything after it
+        // let cleanedContent = rawContent.replace(/\[SUMMARY\].*$/s, '').trim();
+        let cleanedContent = rawContent.replace(/\[SUMMARY\].*$/s, '</content>').trim();
+        
+        if (summary && context === "leverage-loops") {
+          updateLeverageLoopSummary(summary);
+        }
+        // If there's no SUMMARY section, just use the original content
+        if (!summaryMatch) {
+          cleanedContent = rawContent;
+        }
+        
+        return {
+          cleanContent: cleanedContent
+        };
+      }
+      
+      return {
+        cleanContent: rawContent
+      };
+    }
+  
+
+  /**
+   * Update leverage loop summary in the store
+   */
+  const updateLeverageLoopSummary = useCallback((summary: string) => {
+    if (context !== "leverage-loops") return;
+    
+    let summaryId: string | null = null;
+    if (selectedPerson) {
+      summaryId = selectedPerson.full_name;
+    } else if (selectedSuggestionRequest) {
+      summaryId = selectedSuggestionRequest.request_header_title;
+    }
+    
+    if (summaryId && summary) {
+      upsertLeverageLoopSummary({
+        id: summaryId,
+        content: summary,
+        timestamp: new Date(),
+      });
+    }
+  }, [context, selectedPerson, selectedSuggestionRequest, upsertLeverageLoopSummary]);
+
   const { messages, threadId, isLoading } = chatState;
   
-  // Leverage loop summary card should show if there are messages and no person or suggestion request is selected
-  const shouldShowLeverageLoopSummaryCard = context === "leverage-loops" && messages.length > 0 ;
+  // Leverage loop summary card should show if there are messages and no person or suggestion request is selected and the last message is not a system message
+  const shouldShowLeverageLoopSummaryCard = context === "leverage-loops" && messages.length > 1 ;
   
   // Modal state for editing form submissions
   const [isModalOpen, setIsModalOpen] = React.useState(false);
@@ -151,13 +213,22 @@ export const SectionChat: React.FC<SectionChatProps> = ({
             const chunk = decoder.decode(value, { stream: true });
             accumulatedContent += chunk;
 
-            // Update message content as it streams
-            updateMessage(context, responseId, accumulatedContent, true);
+            // During streaming, extract clean content (same logic as final extraction)
+            // This ensures content shows correctly even if summary appears first
+            const { cleanContent: streamingCleanContent } = cleanDocumentContent(accumulatedContent);
+            
+            // Use the clean content for display, or fallback to raw if no summary found yet
+            const contentToShow = streamingCleanContent || accumulatedContent;
+            updateMessage(context, responseId, contentToShow, true);
           }
         }
 
-        // Mark streaming as complete
-        updateMessage(context, responseId, accumulatedContent, false);
+        // After streaming complete, extract summary and update store
+        const { cleanContent } = cleanDocumentContent(accumulatedContent);
+        
+        // Mark streaming as complete with clean content (without summary tags)
+        updateMessage(context, responseId, cleanContent, false);
+
       } catch (error) {
         console.error("Failed to send message:", error);
         // Update message with error
@@ -171,7 +242,7 @@ export const SectionChat: React.FC<SectionChatProps> = ({
         setIsLoading(context, false);
       }
     },
-    [isLoading, threadId, context, systemPrompt, addMessage, updateMessage, setIsLoading]
+    [isLoading, threadId, context, systemPrompt, addMessage, updateMessage, setIsLoading, cleanDocumentContent, updateLeverageLoopSummary]
   );
 
   /**
@@ -272,4 +343,5 @@ export const SectionChat: React.FC<SectionChatProps> = ({
     </div>
   );
 };
+
 

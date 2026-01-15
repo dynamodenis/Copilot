@@ -75,6 +75,7 @@ import {
   Unlock,
   Key,
   Shield,
+  ShieldCheck,
   Home,
   Building,
   Briefcase,
@@ -87,6 +88,8 @@ import {
   MapPin,
   Navigation,
   Compass,
+  Car,
+  Crown,
   type LucideIcon,
 } from 'lucide-react';
 import type { IconProps } from '../types';
@@ -178,6 +181,7 @@ const iconMap: Record<string, LucideIcon> = {
   flag: Flag,
   award: Award,
   gift: Gift,
+  crown: Crown,
   
   // Info & Alerts
   'help-circle': HelpCircle,
@@ -196,6 +200,7 @@ const iconMap: Record<string, LucideIcon> = {
   unlock: Unlock,
   key: Key,
   shield: Shield,
+  'shield-check': ShieldCheck,
   
   // Links & Files
   link: Link,
@@ -209,6 +214,9 @@ const iconMap: Record<string, LucideIcon> = {
   home: Home,
   'map-pin': MapPin,
   globe: Globe,
+  
+  // Transportation
+  car: Car,
   
   // Ideas & Energy
   lightbulb: Lightbulb,

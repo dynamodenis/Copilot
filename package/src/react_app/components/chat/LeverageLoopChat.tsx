@@ -48,8 +48,8 @@ export const LeverageLoopChat: React.FC = () => {
           <h1>Leverage Loops</h1>
         </div>
         <div className={styles.messagesContainer}>
-          <div className={styles.emptyState}>
-            <p>Select a person or suggestion request from the sidebar to start a conversation</p>
+          <div className={styles.emptyStateMessage}>
+            <p>Select a person or suggestion request from the Leverage Loops sidebar to help a person with their leverage loop</p>
           </div>
         </div>
       </div>

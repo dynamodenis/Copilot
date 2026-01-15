@@ -179,9 +179,15 @@ export const LeverageLoopContent: React.FC<LeverageLoopContentProps> = ({
             )}
           </div>
           <StatusIcon status={item.status} />
-          <button className={styles.moreButton} onClick={(e) => e.stopPropagation()}>
+          <span 
+            className={styles.moreButton} 
+            role="button"
+            tabIndex={0}
+            onClick={(e) => e.stopPropagation()}
+            onKeyDown={(e) => e.key === 'Enter' && e.stopPropagation()}
+          >
             ⋮
-          </button>
+          </span>
         </button>
       </div>
     );

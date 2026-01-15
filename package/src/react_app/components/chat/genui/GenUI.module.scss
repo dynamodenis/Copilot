@@ -13,13 +13,68 @@ $spacing-xl: 24px;
 
 // Card Component
 .card {
-  background: var(--genui-card-bg, rgba(255, 255, 255, 0.03));
-  border: 1px solid var(--genui-border, rgba(255, 255, 255, 0.08));
-  border-radius: $border-radius-lg;
-  padding: $spacing-lg;
+  // background: var(--genui-card-bg, rgba(255, 255, 255, 0.03));
+  // border: 1px solid var(--genui-border, rgba(255, 255, 255, 0.08));
+  // border-radius: $border-radius-lg;
+  // padding: $spacing-lg;
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  padding: 0;
   display: flex;
   flex-direction: column;
   gap: $spacing-md;
+}
+
+// Sources Section
+.sources {
+  margin-top: $spacing-lg;
+  padding-top: $spacing-md;
+  border-top: 1px solid var(--genui-border, rgba(255, 255, 255, 0.1));
+}
+
+.sourcesHeader {
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--color-text-muted);
+  margin-bottom: $spacing-sm;
+}
+
+.sourcesList {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-xs;
+}
+
+.sourceItem {
+  display: inline-flex;
+  align-items: baseline;
+  gap: $spacing-xs;
+  font-size: 13px;
+  color: var(--color-text-secondary);
+  text-decoration: none;
+  transition: color 0.15s ease;
+  
+  &:hover {
+    color: var(--color-primary, #6366f1);
+  }
+}
+
+.sourceIndex {
+  color: var(--color-primary, #6366f1);
+  font-weight: 500;
+  font-size: 12px;
+}
+
+.sourceTitle {
+  color: inherit;
+}
+
+.sourceName {
+  color: var(--color-text-muted);
+  font-size: 12px;
 }
 
 // Header Component

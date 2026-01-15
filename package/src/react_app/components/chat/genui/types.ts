@@ -41,9 +41,17 @@ export interface TextContentProps extends BaseGenUIProps {
   textMarkdown: string;
 }
 
+// Source item for Card sources
+export interface SourceItem {
+  url: string;
+  title: string;
+  sourceName?: string;
+}
+
 // Card props
 export interface CardProps extends BaseGenUIProps {
   children: GenUIComponentDef[];
+  sources?: SourceItem[];
 }
 
 // Button props
