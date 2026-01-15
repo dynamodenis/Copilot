@@ -85,3 +85,24 @@
   }
 }
 
+.genUILoading {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 20px;
+  background: rgba(99, 102, 241, 0.08);
+  border: 1px solid rgba(99, 102, 241, 0.15);
+  border-radius: 12px;
+  margin-top: 8px;
+
+  span:last-child {
+    font-size: 13px;
+    color: var(--color-text-muted);
+    font-style: italic;
+  }
+
+  .streamingIndicator {
+    padding: 0;
+  }
+}
+

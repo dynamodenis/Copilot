@@ -11,9 +11,7 @@ interface LeverageLoopContentProps {
   items: LeverageLoopPerson[];
   selectedItem: LeverageLoopPerson | null;
   onItemSelect: (item: LeverageLoopPerson) => void;
-  isLoading?: boolean;
   emptyMessage?: string;
-  error?: string | null;
   selectedSuggestionRequest: SuggestionRequest | null;
   onSuggestionRequestSelect: (suggestionRequest: SuggestionRequest) => void;
 }
@@ -21,15 +19,16 @@ interface LeverageLoopContentProps {
 const StatusIcon: React.FC<{ status: SuggestionRequest["status"] }> = ({ status }) => {
   switch (status) {
     case "draft":
-      return <span className={styles.statusIcon} data-status="draft">✗</span>;
-    case "activated":
-      return <span className={styles.statusIcon} data-status="activated">✗</span>;
-    case "processsing":
-      return <span className={styles.statusIcon} data-status="processsing">✗</span>;
-    case "suggestion_made":
-      return <span className={styles.statusIcon} data-status="suggestion_made">✗</span>;
+      return <span className={styles.statusIcon} data-status="draft">📝</span>;
+    case "suggestion":
+      return <span className={styles.statusIcon} data-status="suggestion">💡</span>;
+    case "processing":
+      return <span className={styles.statusIcon} data-status="processing">⏳</span>;
+    case "archived":
+      return <span className={styles.statusIcon} data-status="archived">📦</span>;
+    default:
+      return <span className={styles.statusIcon} data-status="unknown">❓</span>;
   }
-  return <span className={styles.statusIcon} data-status="completed">✓</span>;
 };
 
 export const LeverageLoopContent: React.FC<LeverageLoopContentProps> = ({
@@ -37,9 +36,7 @@ export const LeverageLoopContent: React.FC<LeverageLoopContentProps> = ({
   items,
   selectedItem,
   onItemSelect,
-  isLoading = false,
   emptyMessage = "No items found",
-  error = null,
   selectedSuggestionRequest,
   onSuggestionRequestSelect,
 }) => {
@@ -49,12 +46,14 @@ export const LeverageLoopContent: React.FC<LeverageLoopContentProps> = ({
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const searchContainerRef = useRef<HTMLDivElement>(null);
 
-  const { suggestionRequests: _suggestionRequests, leverageLoops, isLoading: _isLoading, error: _error } = useLeverageLoopsStore(
+  const { suggestionRequests: _suggestionRequests, leverageLoops, isLoadingPersons, isLoadingSuggestionRequests, personsError, suggestionRequestsError } = useLeverageLoopsStore(
     useShallow((state) => ({
       suggestionRequests: state.suggestionRequests,
       leverageLoops: state.leverageLoops,
-      isLoading: state.isLoading,
-      error: state.error,
+      isLoadingPersons: state.isLoadingPersons,
+      isLoadingSuggestionRequests: state.isLoadingSuggestionRequests,
+      personsError: state.personsError,
+      suggestionRequestsError: state.suggestionRequestsError,
     }))
   );
 
@@ -86,7 +85,6 @@ export const LeverageLoopContent: React.FC<LeverageLoopContentProps> = ({
   };
 
   const filterLeverageLoopPersons = (persons: LeverageLoopPerson[], query: string): LeverageLoopPerson[] => {
-    console.log("persons in filterLeverageLoopPersons", persons);
     if (!query) return [];
     return persons.filter((person) =>
       person.full_name?.toLowerCase().includes(query.toLowerCase()) ||
@@ -151,7 +149,7 @@ export const LeverageLoopContent: React.FC<LeverageLoopContentProps> = ({
   };
 
   const renderSuggestionRequest = (item: SuggestionRequest, isChild = false) => {
-    const isSelected = selectedSuggestionRequest?.request_header_title === item.request_header_title;
+    const isSelected = selectedSuggestionRequest?.id === item.id;
     return (
       <div key={item.id} className={styles.suggestionItemWrapper}>
         <button
@@ -161,8 +159,26 @@ export const LeverageLoopContent: React.FC<LeverageLoopContentProps> = ({
             onSuggestionRequestSelect(item);
           }}
         >
+          <div className={styles.personAvatar}>
+            {item.master_person?.avatar ? (
+              <img src={item.master_person.avatar} alt={item.master_person.name || "Person"} />
+            ) : (
+              <span className={styles.avatarPlaceholder}>
+                {item.master_person?.name?.charAt(0) || "?"}
+              </span>
+            )}
+          </div>
+          <div className={styles.personInfo}>
+            <span className={styles.personName}>{item.master_person?.name || item.request_header_title}</span>
+            {(item.master_person?.current_title || item.master_person?.company_name) && (
+              <span className={styles.personTitle}>
+                {item.master_person?.current_title}
+                {item.master_person?.current_title && item.master_person?.company_name && " at "}
+                {item.master_person?.company_name}
+              </span>
+            )}
+          </div>
           <StatusIcon status={item.status} />
-          <span className={styles.suggestionLabel}>{item.request_header_title}</span>
           <button className={styles.moreButton} onClick={(e) => e.stopPropagation()}>
             ⋮
           </button>
@@ -192,7 +208,16 @@ export const LeverageLoopContent: React.FC<LeverageLoopContentProps> = ({
         
         {isDropdownOpen && (
           <div className={styles.searchDropdown}>
-            {filteredPersons.length === 0 ? (
+            {isLoadingPersons ? (
+              <div className={styles.dropdownLoading}>
+                <span className={styles.loadingSpinner}></span>
+                Loading persons...
+              </div>
+            ) : personsError ? (
+              <div className={styles.dropdownError}>
+                {personsError}
+              </div>
+            ) : filteredPersons.length === 0 ? (
               <div className={styles.dropdownEmpty}>
                 No persons found for "{searchQuery}"
               </div>
@@ -204,18 +229,18 @@ export const LeverageLoopContent: React.FC<LeverageLoopContentProps> = ({
       </div>
 
       <div className={styles.suggestionsList}>
-        {isLoading ? (
+        {isLoadingSuggestionRequests ? (
           <div className={styles.loadingState}>
             <span className={styles.loadingSpinner}></span>
-            Loading...
+            Loading suggestion requests...
+          </div>
+        ) : suggestionRequestsError ? (
+          <div className={styles.errorState}>
+            {suggestionRequestsError}
           </div>
         ) : _suggestionRequests.length === 0 ? (
           <div className={styles.emptyState}>
             {emptyMessage}
-          </div>
-        ) : error ? (
-          <div className={styles.errorState}>
-            {error}
           </div>
         ) : (
           _suggestionRequests.map((suggestionRequest) => renderSuggestionRequest(suggestionRequest))

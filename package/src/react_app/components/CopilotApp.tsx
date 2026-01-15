@@ -1,9 +1,8 @@
 import { useState } from "react";
 import { CopilotSidebar, type SidebarSection } from "./CopilotSidebar";
-import { CopilotChat } from "./CopilotChat";
-import { OutcomesSection } from "./OutcomesSection";
-import { LeverageLoopsSection } from "./LeverageLoopsSection";
+import { CopilotMainChat, OutcomesChat, LeverageLoopChat } from "./chat";
 import styles from "./CopilotApp.module.scss";
+import "../index.css";
 
 interface CopilotAppProps {
   agentName?: string;
@@ -15,20 +14,22 @@ interface CopilotAppProps {
 
 export const CopilotApp: React.FC<CopilotAppProps> = ({
   agentName = "Copilot",
-  logoUrl,
+  token,
+  dataSource,
+  baseUrl,
 }) => {
   const [activeSection, setActiveSection] = useState<SidebarSection>("copilot");
 
   const renderContent = () => {
     switch (activeSection) {
       case "copilot":
-        return <CopilotChat agentName={agentName} logoUrl={logoUrl} />;
+        return <CopilotMainChat agentName={agentName} />;
       case "outcomes":
-        return <OutcomesSection />;
+        return <OutcomesChat />;
       case "leverage-loops":
-        return <LeverageLoopsSection />;
+        return <LeverageLoopChat />;
       default:
-        return <CopilotChat agentName={agentName} logoUrl={logoUrl} />;
+        return <CopilotMainChat agentName={agentName} />;
     }
   };
 

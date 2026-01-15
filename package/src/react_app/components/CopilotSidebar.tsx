@@ -4,6 +4,9 @@ import styles from "./CopilotSidebar.module.scss";
 import { LeverageLoopContent } from "./shared";
 
 import { useLeverageLoopsStore, type LeverageLoopPerson, type SuggestionRequest } from "@/react_app/store/leverageLoopsStore";
+import { useChatContextStore, type ChatMessageType } from "@/react_app/store/chatContextStore";
+import { generateId } from "./chat/SectionChat";
+import { leverageLoopInitialSectionContentPrompt } from "./leverage_loop/LeverageLoopChatContent";
 
 import OrbiterLogo from "@/react_app/assets/sidebar/Orbiter logo.svg";
 import OutcomesLogo from "@/react_app/assets/sidebar/target-arrow.svg";
@@ -16,52 +19,39 @@ interface CopilotSidebarProps {
   onSectionChange: (section: SidebarSection) => void;
 }
 
-// Sample data for Outcomes section
-// TODO: Replace with actual data fetching
-// const outcomesData: SuggestionItem[] = [
-//   { id: "1", label: "Brand Identity Design", status: "completed" },
-//   {
-//     id: "2",
-//     label: "Identify Launch Partners",
-//     status: "in-progress",
-//     children: [
-//       { id: "2a", label: "Map Your Partnership Categories", status: "completed" },
-//       { id: "2b", label: "Research & Score Potential Partners", status: "in-progress" },
-//       { id: "2c", label: "Build Your Partnership Value Prop", status: "pending" },
-//       { id: "2d", label: "Identify Key Stakeholders", status: "pending" },
-//       { id: "2e", label: "Create Outreach Sequence", status: "pending" },
-//       { id: "2f", label: "Secure Agreements", status: "pending" },
-//     ],
-//   },
-//   { id: "3", label: "Onboard Operator Pilots", status: "pending" },
-//   { id: "4", label: "1st Paying Enterprise Pilot", status: "pending" },
-//   { id: "5", label: "Close $30M+ Seed Round", status: "pending" },
-//   { id: "6", label: "Press Pickup", status: "pending" },
-//   { id: "7", label: "Archived", status: "archived" },
-// ];
-
-
 export const CopilotSidebar: React.FC<CopilotSidebarProps> = ({
   activeSection,
   onSectionChange,
 }) => {
-  const { leverageLoops: _leverageLoops, suggestionRequests: _suggestionRequests, fetchNetworkPersons,fetchSuggestionRequests, isLoading: _isLoading, error: _error } = useLeverageLoopsStore(
+  // Leverage loops data store
+  const { leverageLoops: _leverageLoops, fetchNetworkPersons, fetchSuggestionRequests } = useLeverageLoopsStore(
     useShallow((state) => ({
       leverageLoops: state.leverageLoops,
-      suggestionRequests: state.suggestionRequests,
       fetchNetworkPersons: state.fetchNetworkPersons,
       fetchSuggestionRequests: state.fetchSuggestionRequests,
-      isLoading: state.isLoading,
-      error: state.error,
     }))
   );
-  // TODO: Use these values when implementing the UI
-  void _leverageLoops; void _isLoading;
 
+  // Chat context store for selections
+  const { 
+    selectedPerson, 
+    selectedSuggestionRequest, 
+    setSelectedPerson, 
+    setSelectedSuggestionRequest,
+    addMessage,
+    leverageLoopChats,
+  } = useChatContextStore(
+    useShallow((state) => ({
+      selectedPerson: state.selectedPerson,
+      selectedSuggestionRequest: state.selectedSuggestionRequest,
+      setSelectedPerson: state.setSelectedPerson,
+      setSelectedSuggestionRequest: state.setSelectedSuggestionRequest,
+      addMessage: state.addMessage,
+      leverageLoopChats: state.leverageLoopChats,
+    }))
+  );
 
   const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set());
-  const [selectedSuggestionRequest, setSelectedSuggestionRequest] = useState<SuggestionRequest | null>(null);
-  const [selectedItem, setSelectedItem] = useState<LeverageLoopPerson | null>(null);
 
   const toggleSection = (sectionId: SidebarSection) => {
     onSectionChange(sectionId);
@@ -77,16 +67,39 @@ export const CopilotSidebar: React.FC<CopilotSidebarProps> = ({
   };
 
   const handleItemSelect = (item: LeverageLoopPerson) => {
-    setSelectedItem(item);
-    // When you select leverage loop person, deselect the selected suggestion request
-    setSelectedSuggestionRequest(null);
-    onSectionChange("copilot"); // Open Copilot chat when item is selected
+    setSelectedPerson(item);
+    // Navigate to leverage-loops chat
+    onSectionChange("leverage-loops");
+
+    // Check if this person's chat already has an initial assistant message
+    const chatKey = item.full_name;
+    const existingChat = leverageLoopChats[chatKey];
+    const hasInitialMessage = existingChat?.messages?.[0]?.role === "assistant";
+
+    // Only add the initial message if it doesn't already exist
+    if (!hasInitialMessage) {
+      const context = "leverage-loops";
+      const responseId = generateId();
+
+      // Wrap in thesys content tag
+      const content = `<content thesys="true">${JSON.stringify(leverageLoopInitialSectionContentPrompt(item))}</content>`;
+
+      const assistantMessage: ChatMessageType = {
+        id: responseId,
+        role: "assistant",
+        content: content,
+        timestamp: new Date(),
+        isStreaming: false,
+      };
+
+      addMessage(context, assistantMessage, chatKey);
+    }
   };
+
   const handleSuggestionRequestSelect = (suggestionRequest: SuggestionRequest) => {
     setSelectedSuggestionRequest(suggestionRequest);
-    // When you select leverage loop suggestion, deselect the selected person
-    setSelectedItem(null);
-    onSectionChange("copilot");
+    // Navigate to leverage-loops chat
+    onSectionChange("leverage-loops");
   };
 
   useEffect(() => {
@@ -169,12 +182,10 @@ export const CopilotSidebar: React.FC<CopilotSidebarProps> = ({
             <LeverageLoopContent
               contentType="leverage-loops"
               items={_leverageLoops}
-              selectedItem={selectedItem ?? null}
-              selectedSuggestionRequest={selectedSuggestionRequest ?? null}   
+              selectedItem={selectedPerson}
+              selectedSuggestionRequest={selectedSuggestionRequest}   
               onItemSelect={handleItemSelect}
               onSuggestionRequestSelect={handleSuggestionRequestSelect}
-              isLoading={_isLoading}
-              error={_error}
             />
           )}
         </div>

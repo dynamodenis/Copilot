@@ -34,6 +34,7 @@ export interface MasterPerson {
   orbiter_connect_request_sent: boolean;
   orbiter_connect_request_received: boolean;
   orbiter_connection: boolean;
+  company_name?: string;
 }
 
 export interface LeverageLoopPerson {
@@ -48,24 +49,42 @@ export interface LeverageLoopPerson {
 }
 
 export interface SuggestionRequest {
-  id: number;
+  id?: number;
+  created_at?: number;
+  updated_at?: number | null;
+  user_id?: number;
+  copilot_mode?: string;
   request_panel_title: string;
   request_header_title: string;
   request_context: string;
-  status: "draft" | "activated" | "processsing" | "suggestion_made" | "archived";
-  leverage_loop_suggestions: any[];
-  leverage_loop_suggestion_count: number;
+  status: "draft" | "suggestion"  | "processing" | "archived";
+  leverage_loop_suggestions?: any[];
+  leverage_loop_suggestion_count?: number;
+  outcome_suggestions?: any[];
+  outcome_plan_steps?: any[];
+  outcome_suggestion_count?: number;
+  parent_suggestion_context?: string | null;
+  master_person_id: number;
+  // Person fields (populated from master_person)
+  master_person?: MasterPerson;
 }
 
 interface LeverageLoopsStore {
   leverageLoops: LeverageLoopPerson[];
   suggestionRequests: SuggestionRequest[];
-  isLoading: boolean;
-  error: string | null;
+  // Separate loading states for each operation
+  isLoadingPersons: boolean;
+  isLoadingSuggestionRequests: boolean;
+  isCreatingSuggestionRequest: boolean;
+  // Separate error states for each operation
+  personsError: string | null;
+  suggestionRequestsError: string | null;
+  createSuggestionRequestError: string | null;
   fetchNetworkPersons: () => Promise<void>;
   fetchSuggestionRequests: () => Promise<void>;
   setLeverageLoops: (leverageLoops: LeverageLoopPerson[]) => void;
   addLeverageLoops: (leverageLoops: LeverageLoopPerson[]) => void;
+  createSuggestionRequest: (suggestionRequest: SuggestionRequest) => Promise<void>;
 }
 
 
@@ -81,13 +100,20 @@ if (!token) {
   console.error('VITE_API_TOKEN is not defined in environment variables');
 }
 
-export const useLeverageLoopsStore = create<LeverageLoopsStore>()(devtools((set) => ({
+export const useLeverageLoopsStore = create<LeverageLoopsStore>()(devtools((set, get) => ({
   leverageLoops: [],
   suggestionRequests: [],
-  isLoading: false,
-  error: null,
+  // Separate loading states
+  isLoadingPersons: false,
+  isLoadingSuggestionRequests: false,
+  isCreatingSuggestionRequest: false,
+  // Separate error states
+  personsError: null,
+  suggestionRequestsError: null,
+  createSuggestionRequestError: null,
+
   fetchNetworkPersons: async () => {
-    set({ isLoading: true, error: null })
+    set({ isLoadingPersons: true, personsError: null });
     try {
       const headers = {
         'Content-Type': 'application/json',
@@ -99,22 +125,22 @@ export const useLeverageLoopsStore = create<LeverageLoopsStore>()(devtools((set)
       const data = await response.json();
       
       if (!response.ok) {
-        // Extract error message from API response
         const apiMessage = data?.message || data?.error || 'Failed to fetch loops';
         const errorMessage = `HTTP ${response.status}: ${apiMessage}`;
         throw new Error(errorMessage);
       }
 
-      set({ leverageLoops: data, isLoading: false });
+      set({ leverageLoops: data, isLoadingPersons: false });
     } catch (error) {
       set({
-        error: error instanceof Error ? error.message : 'Unknown error',
-        isLoading: false
+        personsError: error instanceof Error ? error.message : 'Unknown error',
+        isLoadingPersons: false
       });
     }
   },
+
   fetchSuggestionRequests: async () => {
-    set({ isLoading: true, error: null })
+    set({ isLoadingSuggestionRequests: true, suggestionRequestsError: null });
     try {
       const headers = {
         'Content-Type': 'application/json',
@@ -126,20 +152,50 @@ export const useLeverageLoopsStore = create<LeverageLoopsStore>()(devtools((set)
       const data = await response.json();
       
       if (!response.ok) {
-        // Extract error message from API response
         const apiMessage = data?.message || data?.error || 'Failed to fetch suggestion requests';
         const errorMessage = `HTTP ${response.status}: ${apiMessage}`;
         throw new Error(errorMessage);
       }
-      set({ suggestionRequests: data?.items ?? [], isLoading: false });
+      set({ suggestionRequests: data?.items ?? [], isLoadingSuggestionRequests: false });
 
     } catch (error) {
       set({
-        error: error instanceof Error ? error.message : 'Unknown error',
-        isLoading: false
+        suggestionRequestsError: error instanceof Error ? error.message : 'Unknown error',
+        isLoadingSuggestionRequests: false
       });
     }
   },
+
+  createSuggestionRequest: async (suggestionRequest: SuggestionRequest) => {
+    set({ isCreatingSuggestionRequest: true, createSuggestionRequestError: null });
+    try {
+      const headers = {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
+        'x-data-source': dataSource
+      };
+        
+      const response = await fetch(`${baseUrl}:MkA4QsNh/suggestion-requests`, 
+        { headers, method: 'POST', body: JSON.stringify(suggestionRequest) }
+      );
+
+      // Parse the response body once
+      const data = await response.json();
+
+      if (!response.ok) {
+        const apiMessage = data?.message || data?.error || 'Failed to create suggestion request';
+        throw new Error(`HTTP ${response.status}: ${apiMessage}`);
+      }
+
+      set({ suggestionRequests: [...get().suggestionRequests, data], isCreatingSuggestionRequest: false });
+    } catch (error) {
+      set({
+        createSuggestionRequestError: error instanceof Error ? error.message : 'Unknown error',
+        isCreatingSuggestionRequest: false
+      });
+    }
+  },
+
   setLeverageLoops: (leverageLoops) => set({ leverageLoops }),
   addLeverageLoops: (newLoops) => set((state) => ({ leverageLoops: [...state.leverageLoops, ...newLoops] })),
 })));
