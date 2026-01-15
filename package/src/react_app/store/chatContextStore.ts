@@ -24,6 +24,9 @@ export interface ChatSummaryType {
   timestamp: Date;
 }
 
+// Leverage loops uses keyed chat states - one per person/suggestion request
+export type LeverageLoopChats = Record<string, ChatState>;
+
 interface ChatContextStore {
   // Current active chat context
   activeContext: ChatContext;
@@ -37,7 +40,8 @@ interface ChatContextStore {
   // Separate chat states for each context
   copilotChat: ChatState;
   outcomesChat: ChatState;
-  leverageLoopsChat: ChatState;
+  // Keyed by person full_name or suggestion request request_panel_title
+  leverageLoopChats: LeverageLoopChats;
   
   // Actions
   setActiveContext: (context: ChatContext) => void;
@@ -46,10 +50,15 @@ interface ChatContextStore {
   upsertLeverageLoopSummary: (summary: ChatSummaryType) => void;
 
   // Chat state actions
-  addMessage: (context: ChatContext, message: ChatMessageType) => void;
-  updateMessage: (context: ChatContext, messageId: string, content: string, isStreaming?: boolean) => void;
-  setIsLoading: (context: ChatContext, isLoading: boolean) => void;
-  clearChat: (context: ChatContext) => void;
+  addMessage: (context: ChatContext, message: ChatMessageType, chatKey?: string) => void;
+  updateMessage: (context: ChatContext, messageId: string, content: string, isStreaming?: boolean, chatKey?: string) => void;
+  setIsLoading: (context: ChatContext, isLoading: boolean, chatKey?: string) => void;
+  clearChat: (context: ChatContext, chatKey?: string) => void;
+  
+  // Helper to get current leverage loop chat key
+  getCurrentLeverageLoopKey: () => string | null;
+  // Helper to get current leverage loop chat state
+  getCurrentLeverageLoopChat: () => ChatState;
 }
 
 const createInitialChatState = (contextId: string): ChatState => ({
@@ -58,8 +67,15 @@ const createInitialChatState = (contextId: string): ChatState => ({
   isLoading: false,
 });
 
+// Default empty chat state for when no leverage loop is selected
+const EMPTY_CHAT_STATE: ChatState = {
+  messages: [],
+  threadId: "thread-empty",
+  isLoading: false,
+};
+
 export const useChatContextStore = create<ChatContextStore>()(
-  devtools((set) => ({
+  devtools((set, get) => ({
     activeContext: "copilot",
     selectedPerson: null,
     selectedSuggestionRequest: null,
@@ -67,7 +83,7 @@ export const useChatContextStore = create<ChatContextStore>()(
     
     copilotChat: createInitialChatState("copilot"),
     outcomesChat: createInitialChatState("outcomes"),
-    leverageLoopsChat: createInitialChatState("leverage-loops"),
+    leverageLoopChats: {},
     
     setActiveContext: (context) => set({ activeContext: context }),
     
@@ -83,22 +99,82 @@ export const useChatContextStore = create<ChatContextStore>()(
       activeContext: "leverage-loops",
     })),
     
-    addMessage: (context, message) => set((state) => {
-      const chatKey = getChatKey(context);
+    // Helper to get current leverage loop chat key based on selection
+    getCurrentLeverageLoopKey: () => {
+      const state = get();
+      if (state.selectedPerson) {
+        return state.selectedPerson.full_name;
+      }
+      if (state.selectedSuggestionRequest) {
+        return state.selectedSuggestionRequest.request_panel_title;
+      }
+      return null;
+    },
+    
+    // Helper to get current leverage loop chat state
+    getCurrentLeverageLoopChat: () => {
+      const state = get();
+      const key = state.getCurrentLeverageLoopKey();
+      if (key && state.leverageLoopChats[key]) {
+        return state.leverageLoopChats[key];
+      }
+      return EMPTY_CHAT_STATE;
+    },
+    
+    addMessage: (context, message, chatKey) => set((state) => {
+      if (context === "leverage-loops") {
+        const key = chatKey || state.getCurrentLeverageLoopKey();
+        if (!key) return state;
+        
+        const existingChat = state.leverageLoopChats[key] || createInitialChatState(`leverage-loop-${key}`);
+        return {
+          leverageLoopChats: {
+            ...state.leverageLoopChats,
+            [key]: {
+              ...existingChat,
+              messages: [...existingChat.messages, message],
+            },
+          },
+        };
+      }
+      
+      const stateKey = getChatKey(context);
       return {
-        [chatKey]: {
-          ...state[chatKey],
-          messages: [...state[chatKey].messages, message],
+        [stateKey]: {
+          ...state[stateKey],
+          messages: [...state[stateKey].messages, message],
         },
       };
     }),
     
-    updateMessage: (context, messageId, content, isStreaming) => set((state) => {
-      const chatKey = getChatKey(context);
+    updateMessage: (context, messageId, content, isStreaming, chatKey) => set((state) => {
+      if (context === "leverage-loops") {
+        const key = chatKey || state.getCurrentLeverageLoopKey();
+        if (!key) return state;
+        
+        const existingChat = state.leverageLoopChats[key];
+        if (!existingChat) return state;
+        
+        return {
+          leverageLoopChats: {
+            ...state.leverageLoopChats,
+            [key]: {
+              ...existingChat,
+              messages: existingChat.messages.map((msg) =>
+                msg.id === messageId
+                  ? { ...msg, content, isStreaming: isStreaming ?? msg.isStreaming }
+                  : msg
+              ),
+            },
+          },
+        };
+      }
+      
+      const stateKey = getChatKey(context);
       return {
-        [chatKey]: {
-          ...state[chatKey],
-          messages: state[chatKey].messages.map((msg) =>
+        [stateKey]: {
+          ...state[stateKey],
+          messages: state[stateKey].messages.map((msg) =>
             msg.id === messageId
               ? { ...msg, content, isStreaming: isStreaming ?? msg.isStreaming }
               : msg
@@ -107,20 +183,48 @@ export const useChatContextStore = create<ChatContextStore>()(
       };
     }),
     
-    setIsLoading: (context, isLoading) => set((state) => {
-      const chatKey = getChatKey(context);
+    setIsLoading: (context, isLoading, chatKey) => set((state) => {
+      if (context === "leverage-loops") {
+        const key = chatKey || state.getCurrentLeverageLoopKey();
+        if (!key) return state;
+        
+        const existingChat = state.leverageLoopChats[key] || createInitialChatState(`leverage-loop-${key}`);
+        return {
+          leverageLoopChats: {
+            ...state.leverageLoopChats,
+            [key]: {
+              ...existingChat,
+              isLoading,
+            },
+          },
+        };
+      }
+      
+      const stateKey = getChatKey(context);
       return {
-        [chatKey]: {
-          ...state[chatKey],
+        [stateKey]: {
+          ...state[stateKey],
           isLoading,
         },
       };
     }),
     
-    clearChat: (context) => set(() => {
-      const chatKey = getChatKey(context);
+    clearChat: (context, chatKey) => set((state) => {
+      if (context === "leverage-loops") {
+        const key = chatKey || state.getCurrentLeverageLoopKey();
+        if (!key) return state;
+        
+        return {
+          leverageLoopChats: {
+            ...state.leverageLoopChats,
+            [key]: createInitialChatState(`leverage-loop-${key}`),
+          },
+        };
+      }
+      
+      const stateKey = getChatKey(context);
       return {
-        [chatKey]: createInitialChatState(context),
+        [stateKey]: createInitialChatState(context),
       };
     }),
 
@@ -141,15 +245,15 @@ export const useChatContextStore = create<ChatContextStore>()(
   }))
 );
 
-// Helper function to get the correct chat state key
-function getChatKey(context: ChatContext): keyof Pick<ChatContextStore, "copilotChat" | "outcomesChat" | "leverageLoopsChat"> {
+// Helper function to get the correct chat state key for non-leverage-loop contexts
+function getChatKey(context: ChatContext): keyof Pick<ChatContextStore, "copilotChat" | "outcomesChat"> {
   switch (context) {
     case "copilot":
       return "copilotChat";
     case "outcomes":
       return "outcomesChat";
-    case "leverage-loops":
-      return "leverageLoopsChat";
+    default:
+      return "copilotChat"; // Fallback, leverage-loops handled separately
   }
 }
 

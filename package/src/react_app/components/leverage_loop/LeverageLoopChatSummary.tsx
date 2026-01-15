@@ -14,13 +14,13 @@ export const LeverageLoopSummary: React.FC<LeverageLoopSummaryProps> = ({
 }) => {
   const [summaryInput, setSummaryInput] = useState("");
 
-  const { selectedPerson, selectedSuggestionRequest, leverageLoopSummaries, upsertLeverageLoopSummary, leverageLoopsChat } = useChatContextStore(
+  const { selectedPerson, selectedSuggestionRequest, leverageLoopSummaries, upsertLeverageLoopSummary, currentLeverageLoopChat } = useChatContextStore(
     useShallow((state) => ({
       selectedPerson: state.selectedPerson,
       selectedSuggestionRequest: state.selectedSuggestionRequest,
       leverageLoopSummaries: state.leverageLoopSummaries,
       upsertLeverageLoopSummary: state.upsertLeverageLoopSummary,
-      leverageLoopsChat: state.leverageLoopsChat,
+      currentLeverageLoopChat: state.getCurrentLeverageLoopChat(),
     }))
   );
 
@@ -38,8 +38,8 @@ export const LeverageLoopSummary: React.FC<LeverageLoopSummaryProps> = ({
       const existingSummary = leverageLoopSummaries.find((s) => s.id === summaryId);
       const savedSummaryContent = existingSummary?.content || "";
       
-      // Get user messages from leverage-loops chat
-      const userMessages = leverageLoopsChat.messages
+      // Get user messages from current leverage-loop chat (specific to this person/suggestion request)
+      const userMessages = currentLeverageLoopChat.messages
         .filter((msg) => msg.role === "user")
         .map((msg) => msg.content.trim())
         .filter((content) => content.length > 0);
@@ -57,7 +57,7 @@ export const LeverageLoopSummary: React.FC<LeverageLoopSummaryProps> = ({
     } else {
       setSummaryInput("");
     }
-  }, [selectedPerson, selectedSuggestionRequest, leverageLoopSummaries, leverageLoopsChat.messages]);
+  }, [selectedPerson, selectedSuggestionRequest, leverageLoopSummaries, currentLeverageLoopChat.messages]);
 
   const getTitle = () => {
     if (selectedPerson) {

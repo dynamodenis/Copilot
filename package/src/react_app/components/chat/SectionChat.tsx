@@ -44,11 +44,17 @@ export const SectionChat: React.FC<SectionChatProps> = ({
     setIsLoading,
   } = useChatContextStore(
     useShallow((state) => {
-      const chatKey = context === "copilot" 
-        ? "copilotChat" 
-        : context === "outcomes" 
-          ? "outcomesChat" 
-          : "leverageLoopsChat";
+      // For leverage-loops, use the keyed chat state based on current selection
+      if (context === "leverage-loops") {
+        return {
+          chatState: state.getCurrentLeverageLoopChat(),
+          addMessage: state.addMessage,
+          updateMessage: state.updateMessage,
+          setIsLoading: state.setIsLoading,
+        };
+      }
+      
+      const chatKey = context === "copilot" ? "copilotChat" : "outcomesChat";
       return {
         chatState: state[chatKey],
         addMessage: state.addMessage,

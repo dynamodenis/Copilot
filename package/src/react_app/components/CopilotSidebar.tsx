@@ -39,6 +39,7 @@ export const CopilotSidebar: React.FC<CopilotSidebarProps> = ({
     setSelectedPerson, 
     setSelectedSuggestionRequest,
     addMessage,
+    leverageLoopChats,
   } = useChatContextStore(
     useShallow((state) => ({
       selectedPerson: state.selectedPerson,
@@ -46,6 +47,7 @@ export const CopilotSidebar: React.FC<CopilotSidebarProps> = ({
       setSelectedPerson: state.setSelectedPerson,
       setSelectedSuggestionRequest: state.setSelectedSuggestionRequest,
       addMessage: state.addMessage,
+      leverageLoopChats: state.leverageLoopChats,
     }))
   );
 
@@ -69,22 +71,29 @@ export const CopilotSidebar: React.FC<CopilotSidebarProps> = ({
     // Navigate to leverage-loops chat
     onSectionChange("leverage-loops");
 
-    const context = "leverage-loops";
-    const responseId = generateId();
-  
+    // Check if this person's chat already has an initial assistant message
+    const chatKey = item.full_name;
+    const existingChat = leverageLoopChats[chatKey];
+    const hasInitialMessage = existingChat?.messages?.[0]?.role === "assistant";
 
-    // Wrap in thesys content tag
-    const content = `<content thesys="true">${JSON.stringify(leverageLoopInitialSectionContentPrompt(item))}</content>`;
+    // Only add the initial message if it doesn't already exist
+    if (!hasInitialMessage) {
+      const context = "leverage-loops";
+      const responseId = generateId();
 
-    const assistantMessage: ChatMessageType = {
-      id: responseId,
-      role: "assistant",
-      content: content,
-      timestamp: new Date(),
-      isStreaming: false,
-    };
+      // Wrap in thesys content tag
+      const content = `<content thesys="true">${JSON.stringify(leverageLoopInitialSectionContentPrompt(item))}</content>`;
 
-    addMessage(context, assistantMessage);
+      const assistantMessage: ChatMessageType = {
+        id: responseId,
+        role: "assistant",
+        content: content,
+        timestamp: new Date(),
+        isStreaming: false,
+      };
+
+      addMessage(context, assistantMessage, chatKey);
+    }
   };
 
   const handleSuggestionRequestSelect = (suggestionRequest: SuggestionRequest) => {
