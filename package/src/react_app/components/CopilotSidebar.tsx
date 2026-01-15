@@ -54,6 +54,8 @@ export const CopilotSidebar: React.FC<CopilotSidebarProps> = ({
   const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set());
 
   const toggleSection = (sectionId: SidebarSection) => {
+
+    console.log("toggleSection", sectionId);
     onSectionChange(sectionId);
     setExpandedSections((prev) => {
       const newSet = new Set(prev);
