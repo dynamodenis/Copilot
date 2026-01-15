@@ -73,31 +73,36 @@ export const SectionChat: React.FC<SectionChatProps> = ({
     })
   );
 
-  /**
-   * Extract summary from response content and return clean content
-   * Format: [SUMMARY]...[/SUMMARY]
-   * Also handles cases where LLM duplicates content after the summary
-   */
-  const extractSummary = useCallback((content: string): { cleanContent: string; summary: string | null } => {
-    const summaryMatch = content.match(/\[SUMMARY\]([\s\S]*?)\[\/SUMMARY\]/);
-    if (summaryMatch && summaryMatch[1]) {
-      const summary = summaryMatch[1].trim();
-      
-      // Remove the summary and everything after it (LLM sometimes duplicates content after summary)
-      // Find where the summary starts and keep only content before it
-      const summaryStartIndex = content.indexOf('[SUMMARY]');
-      let cleanContent = content.substring(0, summaryStartIndex).trim();
-      
-      // If we have nothing before the summary, try to get content after [/SUMMARY]
-      // but only if it doesn't look like a duplicate
-      if (!cleanContent) {
-        cleanContent = content.replace(/\[SUMMARY\][\s\S]*?\[\/SUMMARY\]/, '').trim();
+
+  function cleanDocumentContent(rawContent: string) {
+    // Extract the SUMMARY section
+
+      const summaryMatch = rawContent.match(/\[SUMMARY\](.*?)\[\/SUMMARY\]/s);
+      let summary = null;
+      if (summaryMatch && summaryMatch[1]) {
+        summary = summaryMatch[1].trim();
+        // Remove the SUMMARY section and everything after it
+        // let cleanedContent = rawContent.replace(/\[SUMMARY\].*$/s, '').trim();
+        let cleanedContent = rawContent.replace(/\[SUMMARY\].*$/s, '</content>').trim();
+        
+        if (summary && context === "leverage-loops") {
+          updateLeverageLoopSummary(summary);
+        }
+        // If there's no SUMMARY section, just use the original content
+        if (!summaryMatch) {
+          cleanedContent = rawContent;
+        }
+        
+        return {
+          cleanContent: cleanedContent
+        };
       }
       
-      return { cleanContent, summary };
+      return {
+        cleanContent: rawContent
+      };
     }
-    return { cleanContent: content, summary: null };
-  }, []);
+  
 
   /**
    * Update leverage loop summary in the store
@@ -123,8 +128,8 @@ export const SectionChat: React.FC<SectionChatProps> = ({
 
   const { messages, threadId, isLoading } = chatState;
   
-  // Leverage loop summary card should show if there are messages and no person or suggestion request is selected
-  const shouldShowLeverageLoopSummaryCard = context === "leverage-loops" && messages.length > 0 ;
+  // Leverage loop summary card should show if there are messages and no person or suggestion request is selected and the last message is not a system message
+  const shouldShowLeverageLoopSummaryCard = context === "leverage-loops" && messages.length > 1 ;
   
   // Modal state for editing form submissions
   const [isModalOpen, setIsModalOpen] = React.useState(false);
@@ -208,30 +213,22 @@ export const SectionChat: React.FC<SectionChatProps> = ({
             const chunk = decoder.decode(value, { stream: true });
             accumulatedContent += chunk;
 
-            // During streaming, hide [SUMMARY] tag content but keep the main content visible
-            // Only hide the summary section, not everything after it
-            let streamingContent = accumulatedContent;
+            // During streaming, extract clean content (same logic as final extraction)
+            // This ensures content shows correctly even if summary appears first
+            const { cleanContent: streamingCleanContent } = cleanDocumentContent(accumulatedContent);
             
-            // If we detect a [SUMMARY] tag starting, hide it from display during streaming
-            const summaryStartIndex = streamingContent.indexOf('[SUMMARY]');
-            if (summaryStartIndex !== -1) {
-              streamingContent = streamingContent.substring(0, summaryStartIndex).trim();
-            }
-            
-            updateMessage(context, responseId, streamingContent, true);
+            // Use the clean content for display, or fallback to raw if no summary found yet
+            const contentToShow = streamingCleanContent || accumulatedContent;
+            updateMessage(context, responseId, contentToShow, true);
           }
         }
 
         // After streaming complete, extract summary and update store
-        const { cleanContent, summary } = extractSummary(accumulatedContent);
+        const { cleanContent } = cleanDocumentContent(accumulatedContent);
         
-        // Update the summary store for leverage loops
-        if (summary && context === "leverage-loops") {
-          updateLeverageLoopSummary(summary);
-        }
-
         // Mark streaming as complete with clean content (without summary tags)
         updateMessage(context, responseId, cleanContent, false);
+
       } catch (error) {
         console.error("Failed to send message:", error);
         // Update message with error
@@ -245,7 +242,7 @@ export const SectionChat: React.FC<SectionChatProps> = ({
         setIsLoading(context, false);
       }
     },
-    [isLoading, threadId, context, systemPrompt, addMessage, updateMessage, setIsLoading, extractSummary, updateLeverageLoopSummary]
+    [isLoading, threadId, context, systemPrompt, addMessage, updateMessage, setIsLoading, cleanDocumentContent, updateLeverageLoopSummary]
   );
 
   /**
