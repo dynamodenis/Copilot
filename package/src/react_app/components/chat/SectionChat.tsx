@@ -9,10 +9,10 @@ import { useVariablesStore } from "@/react_app/store/variablesStore";
 import { createSectionChatActionHandler } from "./SectionChatActions";
 import { getComponentInstruction } from "./genui/componentConfig";
 import { LeverageLoopSummary } from "../leverage_loop/LeverageLoopChatSummary";
+import { CopilotEmptyState } from "../shared/CopilotEmptyState";
 import styles from "../CopilotChat.module.scss";
 // Generate unique IDs
 export const generateId = () => `msg-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-
 
 interface SectionChatProps {
   context: ChatContext;
@@ -68,7 +68,6 @@ export const SectionChat: React.FC<SectionChatProps> = ({
       };
     })
   );
-
 
   function cleanDocumentContent(rawContent: string) {
     // Extract the SUMMARY section
@@ -311,9 +310,13 @@ export const SectionChat: React.FC<SectionChatProps> = ({
       {/* Messages */}
       <div className={styles.messagesContainer}>
         {messages.length === 0 ? (
-          <div className={styles.emptyState}>
-            <p>Start a conversation</p>
-          </div>
+          context === "copilot" ? (
+            <CopilotEmptyState />
+          ) : (
+            <div className={styles.emptyState}>
+              <p>Start a conversation</p>
+            </div>
+          )
         ) : (
           messages.map((message) => (
             <ChatMessage
