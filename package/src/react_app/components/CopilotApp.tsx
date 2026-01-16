@@ -1,8 +1,9 @@
-import { useState } from "react";
+import { useState, useLayoutEffect } from "react";
 import { useShallow } from "zustand/react/shallow";
 import { CopilotSidebar, type SidebarSection } from "./CopilotSidebar";
 import { CopilotMainChat, OutcomesChat, LeverageLoopChat } from "./chat";
 import { useChatContextStore } from "@/react_app/store/chatContextStore";
+import { useVariablesStore } from "@/react_app/store/variablesStore";
 import styles from "./CopilotApp.module.scss";
 import "../index.css";
 
@@ -12,15 +13,23 @@ interface CopilotAppProps {
   token?: string;
   dataSource?: string;
   baseUrl?: string;
+  user_id:number
+  copilot_llm_endpoint:string
+  user_name:string
 }
 
 export const CopilotApp: React.FC<CopilotAppProps> = ({
   agentName = "Copilot",
-  token: _token,
-  dataSource: _dataSource,
-  baseUrl: _baseUrl,
+  token,
+  dataSource,
+  baseUrl,
+  user_id,
+  copilot_llm_endpoint,
+  user_name,
 }) => {
   const [activeSection, setActiveSection] = useState<SidebarSection>("copilot");
+  // Zustand setters are stable references, so we don't need useShallow or to include in deps
+  const setVariables = useVariablesStore((state) => state.setVariables);
 
   const { setSelectedPerson, setSelectedSuggestionRequest } = useChatContextStore(
     useShallow((state) => ({
@@ -28,6 +37,13 @@ export const CopilotApp: React.FC<CopilotAppProps> = ({
       setSelectedSuggestionRequest: state.setSelectedSuggestionRequest,
     }))
   );
+
+  // Store the variables synchronously before paint to ensure they're available for child components
+  // Note: setVariables is a stable reference from Zustand, so we don't need it in deps
+  useLayoutEffect(() => {
+    setVariables({ token, baseUrl, dataSource, user_id, copilot_llm_endpoint, user_name });
+    console.log("setVariables", token, baseUrl, dataSource, user_id, copilot_llm_endpoint);
+  }, [token, baseUrl, dataSource, user_id, copilot_llm_endpoint, user_name]);
 
   // When you click on a section in the sidebar, you need to reset the copilot chat section contents
   const handleSectionChangeConfiguration = (section: SidebarSection) => {

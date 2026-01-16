@@ -5,15 +5,11 @@ import { ChatMessage } from "./ChatMessage";
 import { EditPromptModal } from "./EditPromptModal";
 import type { PendingAction, ActionEvent } from "./types";
 import { useChatContextStore, type ChatContext, type ChatMessageType } from "@/react_app/store/chatContextStore";
+import { useVariablesStore } from "@/react_app/store/variablesStore";
 import { createSectionChatActionHandler } from "./SectionChatActions";
 import { getComponentInstruction } from "./genui/componentConfig";
 import { LeverageLoopSummary } from "../leverage_loop/LeverageLoopChatSummary";
 import styles from "../CopilotChat.module.scss";
-
-// Get API URL from environment variable, with fallback for development
-const API_BASE_URL = import.meta.env.VITE_LLM_ENDPOINT || "http://localhost:3001";
-console.log("API_BASE_URL", API_BASE_URL);
-
 // Generate unique IDs
 export const generateId = () => `msg-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
 
@@ -90,7 +86,7 @@ export const SectionChat: React.FC<SectionChatProps> = ({
         }
         // If there's no SUMMARY section, just use the original content
         if (!summaryMatch) {
-          cleanedContent = rawContent;
+          return cleanedContent = rawContent;
         }
         
         return {
@@ -179,7 +175,11 @@ export const SectionChat: React.FC<SectionChatProps> = ({
         const basePrompt = systemPrompt || "You are a helpful AI assistant.";
         const promptContent = `${basePrompt}\n\n${componentRestriction}\n\nUser: ${content.trim()}`;
 
-        const response = await fetch(`${API_BASE_URL}/api/chat`, {
+        // Get the LLM endpoint from the variables store
+        const { copilot_llm_endpoint } = useVariablesStore.getState();
+        const apiUrl = copilot_llm_endpoint || "http://localhost:3001";
+        
+        const response = await fetch(`${apiUrl}/api/chat`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
