@@ -1,4 +1,4 @@
-import type { LeverageLoopPerson } from "@/react_app/store/leverageLoopsStore";
+import type { LeverageLoopPerson, SuggestionRequest } from "@/react_app/store/leverageLoopsStore";
 
 export const leverageLoopInitialSectionContentPrompt = (person: LeverageLoopPerson) => {
   return {
@@ -58,13 +58,6 @@ export const leverageLoopInitialSectionContentPrompt = (person: LeverageLoopPers
                             component: "Card",
                             props: {
                               children: [
-                                // {
-                                //   component: "Header",
-                                //   props: {
-                                //     title: "How would you like to help " + person.full_name + "?",
-                                //     subtitle: (person.master_person?.current_title || '') + " · " + (person.master_person?.master_company?.company_name || '')
-                                //   }
-                                // },
                                 {
                                   component: "TextContent",
                                   props: {
@@ -83,6 +76,70 @@ export const leverageLoopInitialSectionContentPrompt = (person: LeverageLoopPers
               ]
             }
           }
+        ]
+      }
+    },
+    error: null
+  };
+
+};
+
+
+export const suggestionRequestInitialSectionContentPrompt = (suggestionRequest: SuggestionRequest) => {
+  return {
+    component: {
+      component: "Card",
+      props: {
+        children: [
+          {
+            component: "Header",
+            props: {
+              title: `${suggestionRequest.request_header_title}`,
+            }
+          },
+          {
+            component: "TextContent",
+            props: {
+              textMarkdown: `${suggestionRequest.request_context}`
+            }
+          },
+          // {
+          //   component: "ButtonGroup",
+          //   props: {
+          //     variant: "vertical",
+          //     children: [
+          //       {
+          //         component: "Button",
+          //         props: {
+          //           children: "Help " + suggestionRequest.master_person?.name + " with a specific task",
+          //           variant: "secondary",
+          //           action: {
+          //             type: "add_assistant_message",
+          //             props: {
+          //               chatKey: suggestionRequest.request_panel_title,
+          //               componentData: {
+          //                 component: {
+          //                   component: "Card",
+          //                   props: {
+          //                     children: [
+          //                       {
+          //                         component: "TextContent",
+          //                         props: {
+          //                           textMarkdown: "Tell me what kind of assistance you'd like to provide to **" + suggestionRequest.master_person?.name + "**. For example:\n\n- Make an introduction to someone in your network\n- Share relevant resources or information\n- Offer advice or expertise in a specific area\n- Connect them with an opportunity\n\nType your response below and I'll help you plan the best approach."
+          //                         }
+          //                       }
+          //                     ]
+          //                   }
+          //                 },
+          //                 error: null
+          //               }
+          //             }
+          //           }
+          //         }
+          //       }
+          //     ]
+          //   }
+          // }
         ]
       }
     },

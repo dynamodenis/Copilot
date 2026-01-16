@@ -5,6 +5,7 @@ import styles from "./LeverageLoopContent.module.scss";
 import type { ContentType } from "./types";
 import type { LeverageLoopPerson, SuggestionRequest } from "@/react_app/store/leverageLoopsStore";
 import { useLeverageLoopsStore } from "@/react_app/store/leverageLoopsStore";
+import { Spinner } from "./Spinner";
 
 
 interface LeverageLoopContentProps {
@@ -24,7 +25,7 @@ const StatusIcon: React.FC<{ status: SuggestionRequest["status"] }> = ({ status 
     case "suggestion":
       return <span className={styles.statusIcon} data-status="suggestion"></span>;
     case "processing":
-      return <span className={styles.statusIcon} data-status="processing"></span>;
+      return <Spinner size={16} />;
     case "archived":
       return <span className={styles.statusIcon} data-status="archived"></span>;
     default:

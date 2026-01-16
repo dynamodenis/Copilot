@@ -45,4 +45,10 @@ export default defineConfig({
     },
     dedupe: ["react", "react-dom"],
   },
+  server: {
+    hmr: true,
+    watch: {
+      usePolling: true, // Helps on some systems (WSL, Docker, network drives)
+    },
+  },
 });

@@ -106,7 +106,7 @@ export const createSectionChatActionHandler = (deps: ActionHandlerDependencies) 
             request_panel_title: `Suggestion Request for ${personName}`,
             request_header_title: `People to introduce to ${personName}`,
             request_context: `Find people from my network to introduce to ${personName}, who is ${personTitle} at ${companyName}`,
-            status: "suggestion" as const,
+            status: "processing" as const,
             user_id: user_id,
             copilot_mode: "loop",
             master_person_id: masterPersonId as number,

@@ -1,0 +1,21 @@
+.spinnerSimple {
+  animation: rotate 1s linear infinite;
+}
+
+.arc {
+  fill: none;
+  stroke-width: 3;
+  stroke-linecap: round;
+  stroke-dasharray: 75, 100;
+}
+
+.dot {
+  fill: #e879f9;
+}
+
+@keyframes rotate {
+  100% {
+    transform: rotate(360deg);
+  }
+}
+

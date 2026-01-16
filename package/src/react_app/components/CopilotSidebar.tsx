@@ -7,7 +7,7 @@ import { useLeverageLoopsStore, type LeverageLoopPerson, type SuggestionRequest 
 import { useChatContextStore, type ChatMessageType } from "@/react_app/store/chatContextStore";
 import { useVariablesStore } from "@/react_app/store/variablesStore";
 import { generateId } from "./chat/SectionChat";
-import { leverageLoopInitialSectionContentPrompt } from "./leverage_loop/LeverageLoopChatContent";
+import { leverageLoopInitialSectionContentPrompt, suggestionRequestInitialSectionContentPrompt } from "./leverage_loop/LeverageLoopChatContent";
 
 import OrbiterLogo from "@/react_app/assets/sidebar/Orbiter logo.svg";
 import OutcomesLogo from "@/react_app/assets/sidebar/target-arrow.svg";
@@ -112,6 +112,30 @@ export const CopilotSidebar: React.FC<CopilotSidebarProps> = ({
     setSelectedSuggestionRequest(suggestionRequest);
     // Navigate to leverage-loops chat
     onSectionChange("leverage-loops");
+
+    // Check if this person's chat already has an initial assistant message
+    const chatKey = suggestionRequest.request_panel_title;
+    const existingChat = leverageLoopChats[chatKey];
+    const hasInitialMessage = existingChat?.messages?.[0]?.role === "assistant";
+
+    // Only add the initial message if it doesn't already exist
+    if (!hasInitialMessage) {
+      const context = "leverage-loops";
+      const responseId = generateId();
+
+      // Wrap in thesys content tag
+      const content = `<content thesys="true">${JSON.stringify(suggestionRequestInitialSectionContentPrompt(suggestionRequest))}</content>`;
+
+      const assistantMessage: ChatMessageType = {
+        id: responseId,
+        role: "assistant",
+        content: content,
+        timestamp: new Date(),
+        isStreaming: false,
+      };
+
+      addMessage(context, assistantMessage, chatKey);
+    }
   };
 
   // Only fetch data when variables are available in the store
