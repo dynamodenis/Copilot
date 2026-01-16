@@ -1,8 +1,7 @@
-import React, { useEffect } from "react";
+import React from "react";
 import { useShallow } from "zustand/react/shallow";
 import { SectionChat } from "./SectionChat";
-import { useChatContextStore, type ChatMessageType } from "@/react_app/store/chatContextStore";
-import { generateId } from "./SectionChat";
+import { useChatContextStore } from "@/react_app/store/chatContextStore";
 
 /**
  * LeverageLoopChat Component
@@ -14,41 +13,12 @@ export const LeverageLoopChat: React.FC = () => {
   const { 
     selectedPerson, 
     selectedSuggestionRequest,
-    leverageLoopChats,
-    addMessage,
   } = useChatContextStore(
     useShallow((state) => ({
       selectedPerson: state.selectedPerson,
       selectedSuggestionRequest: state.selectedSuggestionRequest,
-      leverageLoopChats: state.leverageLoopChats,
-      addMessage: state.addMessage,
     }))
   );
-
-  // Initialize default chat with initial assistant message if needed
-  useEffect(() => {
-    if (!selectedPerson && !selectedSuggestionRequest) {
-      const defaultKey = "leverage-loop-default";
-      const existingChat = leverageLoopChats[defaultKey];
-      const hasInitialMessage = existingChat?.messages?.[0]?.role === "assistant";
-
-      // Only add the initial message if it doesn't already exist
-      if (!hasInitialMessage) {
-        const context = "leverage-loops";
-        const responseId = generateId();
-
-        const assistantMessage: ChatMessageType = {
-          id: responseId,
-          role: "assistant",
-          content: "Please select a person or leverage loop from the sidebar to get started.",
-          timestamp: new Date(),
-          isStreaming: false,
-        };
-
-        addMessage(context, assistantMessage, defaultKey);
-      }
-    }
-  }, [selectedPerson, selectedSuggestionRequest, leverageLoopChats, addMessage]);
 
   // Build context-aware system prompt
   const getSystemPrompt = () => {

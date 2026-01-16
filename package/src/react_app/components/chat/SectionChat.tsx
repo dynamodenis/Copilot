@@ -312,6 +312,11 @@ export const SectionChat: React.FC<SectionChatProps> = ({
         {messages.length === 0 ? (
           context === "copilot" ? (
             <CopilotEmptyState />
+          ) : context === "leverage-loops" && !selectedPerson && !selectedSuggestionRequest ? (
+            <CopilotEmptyState 
+              greeting="I'm your Leverage Loop Assistant"
+              subtext="Select a person or suggestion request from the sidebar to get started"
+            />
           ) : (
             <div className={styles.emptyState}>
               <p>Start a conversation</p>

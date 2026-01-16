@@ -4,12 +4,21 @@ import { useVariablesStore } from "@/react_app/store/variablesStore";
 import orbiterLogo from "@/react_app/assets/sidebar/Orbiter logo.svg";
 import styles from "../CopilotChat.module.scss";
 
+interface CopilotEmptyStateProps {
+  greeting?: string;
+  subtext?: string;
+}
+
 /**
  * CopilotEmptyState Component
  * 
- * Welcome screen for the Copilot section with logo, user name, and cheeky message.
+ * Welcome screen with logo, greeting, and subtext message.
+ * Used for Copilot and Leverage Loops empty states.
  */
-export const CopilotEmptyState: React.FC = () => {
+export const CopilotEmptyState: React.FC<CopilotEmptyStateProps> = ({ 
+  greeting,
+  subtext,
+}) => {
   const { user_name } = useVariablesStore(
     useShallow((state) => ({
       user_name: state.user_name,
@@ -29,16 +38,18 @@ export const CopilotEmptyState: React.FC = () => {
   };
 
   const displayName = user_name || "there";
+  const displayGreeting = greeting || `Ready to make magic today, ${displayName}`;
+  const displaySubtext = subtext || getCheekyMessage();
 
   return (
     <div className={styles.copilotEmptyState}>
       <img src={orbiterLogo} alt="Orbiter Logo" className={styles.logo} />
       <div className={styles.welcomeMessage}>
         <h2 className={styles.welcomeGreeting}>
-          Ready to make magic today, {displayName}
+          {displayGreeting}
         </h2>
         <p className={styles.welcomeSubtext}>
-          {getCheekyMessage()}
+          {displaySubtext}
         </p>
       </div>
     </div>
