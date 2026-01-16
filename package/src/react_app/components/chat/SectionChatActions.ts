@@ -2,6 +2,7 @@ import type { ActionEvent, PendingAction } from "./types";
 import type { ChatContext, ChatMessageType } from "@/react_app/store/chatContextStore";
 import { useChatContextStore } from "@/react_app/store/chatContextStore";
 import { useLeverageLoopsStore } from "@/react_app/store/leverageLoopsStore";
+import { useVariablesStore } from "@/react_app/store/variablesStore";
 
 // Helper to wrap GenUI content
 const genUIContent = (component: unknown) => `<content thesys="true">${JSON.stringify({ component, error: null })}</content>`;
@@ -100,12 +101,13 @@ export const createSectionChatActionHandler = (deps: ActionHandlerDependencies) 
       case "create_suggestion_request":
         if (event.params) {
           const { personName, personTitle, companyName, masterPersonId, chatKey } = event.params;
+          const { user_id } = useVariablesStore.getState();
           const suggestionRequest = {
             request_panel_title: `Suggestion Request for ${personName}`,
             request_header_title: `People to introduce to ${personName}`,
             request_context: `Find people from my network to introduce to ${personName}, who is ${personTitle} at ${companyName}`,
             status: "suggestion" as const,
-            user_id: 3,
+            user_id: user_id,
             copilot_mode: "loop",
             master_person_id: masterPersonId as number,
           };

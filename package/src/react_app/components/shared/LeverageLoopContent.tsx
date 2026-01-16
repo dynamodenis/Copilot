@@ -19,15 +19,15 @@ interface LeverageLoopContentProps {
 const StatusIcon: React.FC<{ status: SuggestionRequest["status"] }> = ({ status }) => {
   switch (status) {
     case "draft":
-      return <span className={styles.statusIcon} data-status="draft">📝</span>;
+      return <span className={styles.statusIcon} data-status="draft"></span>;
     case "suggestion":
-      return <span className={styles.statusIcon} data-status="suggestion">💡</span>;
+      return <span className={styles.statusIcon} data-status="suggestion"></span>;
     case "processing":
-      return <span className={styles.statusIcon} data-status="processing">⏳</span>;
+      return <span className={styles.statusIcon} data-status="processing"></span>;
     case "archived":
-      return <span className={styles.statusIcon} data-status="archived">📦</span>;
+      return <span className={styles.statusIcon} data-status="archived"></span>;
     default:
-      return <span className={styles.statusIcon} data-status="unknown">❓</span>;
+      return <span className={styles.statusIcon} data-status="unknown"></span>;
   }
 };
 

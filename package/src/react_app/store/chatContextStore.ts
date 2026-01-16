@@ -108,7 +108,7 @@ export const useChatContextStore = create<ChatContextStore>()(
       if (state.selectedSuggestionRequest) {
         return state.selectedSuggestionRequest.request_panel_title;
       }
-      return null;
+      return "leverage-loop-default";
     },
     
     // Helper to get current leverage loop chat state
@@ -118,6 +118,7 @@ export const useChatContextStore = create<ChatContextStore>()(
       if (key && state.leverageLoopChats[key]) {
         return state.leverageLoopChats[key];
       }
+      // Return empty state for default case - will be initialized with message
       return EMPTY_CHAT_STATE;
     },
     
@@ -242,7 +243,7 @@ export const useChatContextStore = create<ChatContextStore>()(
         };
       }
     }),
-  }))
+  }), { name: "ChatContextStore" })
 );
 
 // Helper function to get the correct chat state key for non-leverage-loop contexts

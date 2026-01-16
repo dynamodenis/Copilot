@@ -5,6 +5,7 @@ import { LeverageLoopContent } from "./shared";
 
 import { useLeverageLoopsStore, type LeverageLoopPerson, type SuggestionRequest } from "@/react_app/store/leverageLoopsStore";
 import { useChatContextStore, type ChatMessageType } from "@/react_app/store/chatContextStore";
+import { useVariablesStore } from "@/react_app/store/variablesStore";
 import { generateId } from "./chat/SectionChat";
 import { leverageLoopInitialSectionContentPrompt } from "./leverage_loop/LeverageLoopChatContent";
 
@@ -50,6 +51,14 @@ export const CopilotSidebar: React.FC<CopilotSidebarProps> = ({
       setSelectedSuggestionRequest: state.setSelectedSuggestionRequest,
       addMessage: state.addMessage,
       leverageLoopChats: state.leverageLoopChats,
+    }))
+  );
+
+  // Watch for variables in the store to ensure they're available before making API calls
+  const { token, baseUrl } = useVariablesStore(
+    useShallow((state) => ({
+      token: state.token,
+      baseUrl: state.baseUrl,
     }))
   );
 
@@ -105,10 +114,13 @@ export const CopilotSidebar: React.FC<CopilotSidebarProps> = ({
     onSectionChange("leverage-loops");
   };
 
+  // Only fetch data when variables are available in the store
   useEffect(() => {
-    fetchNetworkPersons();
-    fetchSuggestionRequests();
-  }, []);
+    if (token && baseUrl) {
+      fetchNetworkPersons();
+      fetchSuggestionRequests();
+    }
+  }, [token, baseUrl, fetchNetworkPersons, fetchSuggestionRequests]);
 
   return (
     <div className={styles.sidebar}>

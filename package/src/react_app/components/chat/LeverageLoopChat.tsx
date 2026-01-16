@@ -1,8 +1,8 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { useShallow } from "zustand/react/shallow";
 import { SectionChat } from "./SectionChat";
-import { useChatContextStore } from "@/react_app/store/chatContextStore";
-import styles from "../CopilotChat.module.scss";
+import { useChatContextStore, type ChatMessageType } from "@/react_app/store/chatContextStore";
+import { generateId } from "./SectionChat";
 
 /**
  * LeverageLoopChat Component
@@ -11,12 +11,44 @@ import styles from "../CopilotChat.module.scss";
  * Shows context about the selected person or suggestion request.
  */
 export const LeverageLoopChat: React.FC = () => {
-  const { selectedPerson, selectedSuggestionRequest } = useChatContextStore(
+  const { 
+    selectedPerson, 
+    selectedSuggestionRequest,
+    leverageLoopChats,
+    addMessage,
+  } = useChatContextStore(
     useShallow((state) => ({
       selectedPerson: state.selectedPerson,
       selectedSuggestionRequest: state.selectedSuggestionRequest,
+      leverageLoopChats: state.leverageLoopChats,
+      addMessage: state.addMessage,
     }))
   );
+
+  // Initialize default chat with initial assistant message if needed
+  useEffect(() => {
+    if (!selectedPerson && !selectedSuggestionRequest) {
+      const defaultKey = "leverage-loop-default";
+      const existingChat = leverageLoopChats[defaultKey];
+      const hasInitialMessage = existingChat?.messages?.[0]?.role === "assistant";
+
+      // Only add the initial message if it doesn't already exist
+      if (!hasInitialMessage) {
+        const context = "leverage-loops";
+        const responseId = generateId();
+
+        const assistantMessage: ChatMessageType = {
+          id: responseId,
+          role: "assistant",
+          content: "Please select a person or leverage loop from the sidebar to get started.",
+          timestamp: new Date(),
+          isStreaming: false,
+        };
+
+        addMessage(context, assistantMessage, defaultKey);
+      }
+    }
+  }, [selectedPerson, selectedSuggestionRequest, leverageLoopChats, addMessage]);
 
   // Build context-aware system prompt
   const getSystemPrompt = () => {
@@ -40,32 +72,13 @@ export const LeverageLoopChat: React.FC = () => {
     return undefined;
   };
 
-  // If nothing is selected, show a prompt to select something
-  if (!selectedPerson && !selectedSuggestionRequest) {
-    return (
-      <div className={styles.chatContainer}>
-        <div className={styles.header}>
-          <h1>Leverage Loops</h1>
-        </div>
-        <div className={styles.messagesContainer}>
-          <div className={styles.emptyStateMessage}>
-            <p>Select a person or suggestion request from the Leverage Loops sidebar to help a person with their leverage loop</p>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
   return (
-    <>
-      <SectionChat
-        context="leverage-loops"
-        title="Leverage Loops"
-        subtitle={getSubtitle()}
-        systemPrompt={getSystemPrompt()}
-      />
-    </>
-    
+    <SectionChat
+      context="leverage-loops"
+      title="Leverage Loops"
+      subtitle={getSubtitle()}
+      systemPrompt={getSystemPrompt()}
+    />
   );
 };
 

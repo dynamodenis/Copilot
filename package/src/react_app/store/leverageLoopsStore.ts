@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import { devtools } from 'zustand/middleware';
+import { useVariablesStore } from "./variablesStore";
 
 export interface MasterEmail {
   id: number;
@@ -87,115 +88,140 @@ interface LeverageLoopsStore {
   createSuggestionRequest: (suggestionRequest: SuggestionRequest) => Promise<void>;
 }
 
+export const useLeverageLoopsStore = create<LeverageLoopsStore>()(
+  devtools(
+    (set, get) => ({
+      leverageLoops: [],
+      suggestionRequests: [],
+      // Separate loading states
+      isLoadingPersons: false,
+      isLoadingSuggestionRequests: false,
+      isCreatingSuggestionRequest: false,
+      // Separate error states
+      personsError: null,
+      suggestionRequestsError: null,
+      createSuggestionRequestError: null,
 
+      fetchNetworkPersons: async () => {
+        set({ isLoadingPersons: true, personsError: null });
+        try {
+          const { token, baseUrl, dataSource } = useVariablesStore.getState();
+          
+          if (!baseUrl || (typeof baseUrl === 'string' && baseUrl.trim() === '')) {
+            console.error('VariablesStore state:', useVariablesStore.getState());
+            throw new Error('Base URL is not defined. Please provide it as a prop to CopilotApp.');
+          }
+          if (!token || (typeof token === 'string' && token.trim() === '')) {
+            console.error('VariablesStore state:', useVariablesStore.getState());
+            throw new Error('Token is not defined. Please provide it as a prop to CopilotApp.');
+          }
+          
+          const headers = {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`,
+            'x-data-source': dataSource || ''
+          };
+          const response = await fetch(`${baseUrl}:Et3oQAtI/my-persons`, { headers });
+          
+          const data = await response.json();
+          
+          if (!response.ok) {
+            const apiMessage = data?.message || data?.error || 'Failed to fetch loops';
+            const errorMessage = `HTTP ${response.status}: ${apiMessage}`;
+            throw new Error(errorMessage);
+          }
 
-const baseUrl = import.meta.env.VITE_API_URL;
-const token = import.meta.env.VITE_API_TOKEN;
-const dataSource = import.meta.env.VITE_DATA_SOURCE;
+          set({ leverageLoops: data, isLoadingPersons: false });
+        } catch (error) {
+          set({
+            personsError: error instanceof Error ? error.message : 'Unknown error',
+            isLoadingPersons: false
+          });
+        }
+      },
 
-if (!baseUrl) {
-  console.error('VITE_API_URL is not defined in environment variables');
-}
-if (!token) {
-  console.error('VITE_API_TOKEN is not defined in environment variables');
-}
+      fetchSuggestionRequests: async () => {
+        set({ isLoadingSuggestionRequests: true, suggestionRequestsError: null });
+        try {
+          const { token, baseUrl, dataSource } = useVariablesStore.getState();
+          
+          if (!baseUrl || (typeof baseUrl === 'string' && baseUrl.trim() === '')) {
+            console.error('VariablesStore state:', useVariablesStore.getState());
+            throw new Error('Base URL is not defined. Please provide it as a prop to CopilotApp.');
+          }
+          if (!token || (typeof token === 'string' && token.trim() === '')) {
+            console.error('VariablesStore state:', useVariablesStore.getState());
+            throw new Error('Token is not defined. Please provide it as a prop to CopilotApp.');
+          }
+          
+          const headers = {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`,
+            'x-data-source': dataSource || ''
+          };
+          const response = await fetch(`${baseUrl}:MkA4QsNh/suggestion-requests?copilot_mode=loop`, { headers });
+          
+          const data = await response.json();
+          
+          if (!response.ok) {
+            const apiMessage = data?.message || data?.error || 'Failed to fetch suggestion requests';
+            const errorMessage = `HTTP ${response.status}: ${apiMessage}`;
+            throw new Error(errorMessage);
+          }
+          set({ suggestionRequests: data?.items ?? [], isLoadingSuggestionRequests: false });
 
-export const useLeverageLoopsStore = create<LeverageLoopsStore>()(devtools((set, get) => ({
-  leverageLoops: [],
-  suggestionRequests: [],
-  // Separate loading states
-  isLoadingPersons: false,
-  isLoadingSuggestionRequests: false,
-  isCreatingSuggestionRequest: false,
-  // Separate error states
-  personsError: null,
-  suggestionRequestsError: null,
-  createSuggestionRequestError: null,
+        } catch (error) {
+          set({
+            suggestionRequestsError: error instanceof Error ? error.message : 'Unknown error',
+            isLoadingSuggestionRequests: false
+          });
+        }
+      },
 
-  fetchNetworkPersons: async () => {
-    set({ isLoadingPersons: true, personsError: null });
-    try {
-      const headers = {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`,
-        'x-data-source': dataSource
-      };
-      const response = await fetch(`${baseUrl}:Et3oQAtI/my-persons`, { headers });
-      
-      const data = await response.json();
-      
-      if (!response.ok) {
-        const apiMessage = data?.message || data?.error || 'Failed to fetch loops';
-        const errorMessage = `HTTP ${response.status}: ${apiMessage}`;
-        throw new Error(errorMessage);
-      }
+      createSuggestionRequest: async (suggestionRequest: SuggestionRequest) => {
+        set({ isCreatingSuggestionRequest: true, createSuggestionRequestError: null });
+        try {
+          const { token, baseUrl, dataSource } = useVariablesStore.getState();
+          
+          if (!baseUrl || (typeof baseUrl === 'string' && baseUrl.trim() === '')) {
+            console.error('VariablesStore state:', useVariablesStore.getState());
+            throw new Error('Base URL is not defined. Please provide it as a prop to CopilotApp.');
+          }
+          if (!token || (typeof token === 'string' && token.trim() === '')) {
+            console.error('VariablesStore state:', useVariablesStore.getState());
+            throw new Error('Token is not defined. Please provide it as a prop to CopilotApp.');
+          }
+          
+          const headers = {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`,
+            'x-data-source': dataSource || ''
+          };
+            
+          const response = await fetch(`${baseUrl}:MkA4QsNh/suggestion-requests`, 
+            { headers, method: 'POST', body: JSON.stringify(suggestionRequest) }
+          );
 
-      set({ leverageLoops: data, isLoadingPersons: false });
-    } catch (error) {
-      set({
-        personsError: error instanceof Error ? error.message : 'Unknown error',
-        isLoadingPersons: false
-      });
-    }
-  },
+          // Parse the response body once
+          const data = await response.json();
 
-  fetchSuggestionRequests: async () => {
-    set({ isLoadingSuggestionRequests: true, suggestionRequestsError: null });
-    try {
-      const headers = {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`,
-        'x-data-source': dataSource
-      };
-      const response = await fetch(`${baseUrl}:MkA4QsNh/suggestion-requests?copilot_mode=loop`, { headers });
-      
-      const data = await response.json();
-      
-      if (!response.ok) {
-        const apiMessage = data?.message || data?.error || 'Failed to fetch suggestion requests';
-        const errorMessage = `HTTP ${response.status}: ${apiMessage}`;
-        throw new Error(errorMessage);
-      }
-      set({ suggestionRequests: data?.items ?? [], isLoadingSuggestionRequests: false });
+          if (!response.ok) {
+            const apiMessage = data?.message || data?.error || 'Failed to create suggestion request';
+            throw new Error(`HTTP ${response.status}: ${apiMessage}`);
+          }
 
-    } catch (error) {
-      set({
-        suggestionRequestsError: error instanceof Error ? error.message : 'Unknown error',
-        isLoadingSuggestionRequests: false
-      });
-    }
-  },
+          set({ suggestionRequests: [...get().suggestionRequests, data], isCreatingSuggestionRequest: false });
+        } catch (error) {
+          set({
+            createSuggestionRequestError: error instanceof Error ? error.message : 'Unknown error',
+            isCreatingSuggestionRequest: false
+          });
+        }
+      },
 
-  createSuggestionRequest: async (suggestionRequest: SuggestionRequest) => {
-    set({ isCreatingSuggestionRequest: true, createSuggestionRequestError: null });
-    try {
-      const headers = {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`,
-        'x-data-source': dataSource
-      };
-        
-      const response = await fetch(`${baseUrl}:MkA4QsNh/suggestion-requests`, 
-        { headers, method: 'POST', body: JSON.stringify(suggestionRequest) }
-      );
-
-      // Parse the response body once
-      const data = await response.json();
-
-      if (!response.ok) {
-        const apiMessage = data?.message || data?.error || 'Failed to create suggestion request';
-        throw new Error(`HTTP ${response.status}: ${apiMessage}`);
-      }
-
-      set({ suggestionRequests: [...get().suggestionRequests, data], isCreatingSuggestionRequest: false });
-    } catch (error) {
-      set({
-        createSuggestionRequestError: error instanceof Error ? error.message : 'Unknown error',
-        isCreatingSuggestionRequest: false
-      });
-    }
-  },
-
-  setLeverageLoops: (leverageLoops) => set({ leverageLoops }),
-  addLeverageLoops: (newLoops) => set((state) => ({ leverageLoops: [...state.leverageLoops, ...newLoops] })),
-})));
+      setLeverageLoops: (leverageLoops) => set({ leverageLoops }),
+      addLeverageLoops: (newLoops) => set((state) => ({ leverageLoops: [...state.leverageLoops, ...newLoops] })),
+    }),
+    { name: "LeverageLoopsStore" }
+  )
+);
