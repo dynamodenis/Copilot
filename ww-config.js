@@ -36,5 +36,11 @@ export default {
       defaultValue: "http://localhost:3001",
       bindable: true,
     },
+    user_name: {
+      label: { en: "User Name" },
+      type: "Text",
+      defaultValue: "",
+      bindable: true,
+    },
   },
 };

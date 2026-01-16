@@ -1,5 +1,5 @@
 <template>
-  <CopilotApp :token="content.token" :dataSource="content.dataSource" :baseUrl="content.baseUrl" :user_id="content.user_id" :copilot_llm_endpoint="content.copilot_llm_endpoint" />
+  <CopilotApp :token="content.token" :dataSource="content.dataSource" :baseUrl="content.baseUrl" :user_id="content.user_id" :copilot_llm_endpoint="content.copilot_llm_endpoint" :user_name="content.user_name" />
 </template>
 
 <script>
