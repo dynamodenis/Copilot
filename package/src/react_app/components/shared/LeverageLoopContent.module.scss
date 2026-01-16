@@ -292,25 +292,74 @@
   }
 }
 
+.moreButtonWrapper {
+  position: relative;
+}
+
 .moreButton {
   background: none;
   border: none;
   color: var(--color-text-subtle);
   cursor: pointer;
-  padding: 4px;
-  font-size: 14px;
+  padding: 4px 8px;
+  font-size: 16px;
   line-height: 1;
   border-radius: 4px;
-  opacity: 0;
-  transition: opacity 0.15s ease;
-
-  .suggestionItem:hover & {
-    opacity: 1;
-  }
+  opacity: 1;
+  transition: color 0.15s ease, background 0.15s ease;
 
   &:hover {
     color: var(--color-text-secondary);
     background: var(--color-hover-medium);
+  }
+}
+
+.actionMenu {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  margin-top: 4px;
+  background: var(--color-surface-elevated, #1a1a1a);
+  border: 1px solid var(--color-border-subtle);
+  border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+  min-width: 140px;
+  z-index: 200;
+  overflow: hidden;
+  animation: dropdownSlide 0.15s ease-out;
+}
+
+.actionMenuItem {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 10px 14px;
+  background: none;
+  border: none;
+  color: var(--color-text-secondary);
+  font-size: 13px;
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.15s ease, color 0.15s ease;
+
+  &:hover {
+    background: var(--color-hover-light);
+    color: var(--color-text-primary);
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  &.deleteAction {
+    color: #f87171;
+
+    &:hover {
+      background: rgba(248, 113, 113, 0.1);
+      color: #ef4444;
+    }
   }
 }
 

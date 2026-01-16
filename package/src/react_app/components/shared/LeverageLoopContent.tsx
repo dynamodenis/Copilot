@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { useShallow } from "zustand/react/shallow";
+import { Trash2, Edit3 } from "lucide-react";
 import styles from "./LeverageLoopContent.module.scss";
 import type { ContentType } from "./types";
 import type { LeverageLoopPerson, SuggestionRequest } from "@/react_app/store/leverageLoopsStore";
@@ -44,9 +45,20 @@ export const LeverageLoopContent: React.FC<LeverageLoopContentProps> = ({
   const [expandedItems, setExpandedItems] = useState<Set<string>>(new Set());
   const [searchQuery, setSearchQuery] = useState("");
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [openMenuId, setOpenMenuId] = useState<number | null>(null);
   const searchContainerRef = useRef<HTMLDivElement>(null);
+  const menuRef = useRef<HTMLDivElement>(null);
 
-  const { suggestionRequests: _suggestionRequests, leverageLoops, isLoadingPersons, isLoadingSuggestionRequests, personsError, suggestionRequestsError } = useLeverageLoopsStore(
+  const { 
+    suggestionRequests: _suggestionRequests, 
+    leverageLoops, 
+    isLoadingPersons, 
+    isLoadingSuggestionRequests, 
+    personsError, 
+    suggestionRequestsError,
+    deleteSuggestionRequest,
+    isDeletingSuggestionRequest,
+  } = useLeverageLoopsStore(
     useShallow((state) => ({
       suggestionRequests: state.suggestionRequests,
       leverageLoops: state.leverageLoops,
@@ -54,6 +66,8 @@ export const LeverageLoopContent: React.FC<LeverageLoopContentProps> = ({
       isLoadingSuggestionRequests: state.isLoadingSuggestionRequests,
       personsError: state.personsError,
       suggestionRequestsError: state.suggestionRequestsError,
+      deleteSuggestionRequest: state.deleteSuggestionRequest,
+      isDeletingSuggestionRequest: state.isDeletingSuggestionRequest,
     }))
   );
 
@@ -66,11 +80,30 @@ export const LeverageLoopContent: React.FC<LeverageLoopContentProps> = ({
       if (searchContainerRef.current && !searchContainerRef.current.contains(event.target as Node)) {
         setIsDropdownOpen(false);
       }
+      // Close action menu when clicking outside
+      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+        setOpenMenuId(null);
+      }
     };
 
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
+
+  const handleDeleteSuggestionRequest = async (id: number, e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (isDeletingSuggestionRequest) return;
+    
+    await deleteSuggestionRequest(id);
+    setOpenMenuId(null);
+  };
+
+  const handleEditSuggestionRequest = (id: number, e: React.MouseEvent) => {
+    e.stopPropagation();
+    // TODO: Implement edit functionality
+    console.log("Edit suggestion request:", id);
+    setOpenMenuId(null);
+  };
 
   const toggleItem = (itemId: string) => {
     setExpandedItems((prev) => {
@@ -179,15 +212,46 @@ export const LeverageLoopContent: React.FC<LeverageLoopContentProps> = ({
             )}
           </div>
           <StatusIcon status={item.status} />
-          <span 
-            className={styles.moreButton} 
-            role="button"
-            tabIndex={0}
-            onClick={(e) => e.stopPropagation()}
-            onKeyDown={(e) => e.key === 'Enter' && e.stopPropagation()}
-          >
-            ⋮
-          </span>
+          {item.id !== undefined && (
+            <div className={styles.moreButtonWrapper} ref={openMenuId === item.id ? menuRef : null}>
+              <span 
+                className={styles.moreButton} 
+                role="button"
+                tabIndex={0}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setOpenMenuId(openMenuId === item.id ? null : item.id!);
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    e.stopPropagation();
+                    setOpenMenuId(openMenuId === item.id ? null : item.id!);
+                  }
+                }}
+              >
+                ⋮
+              </span>
+              {openMenuId === item.id && (
+                <div className={styles.actionMenu}>
+                  <button 
+                    className={styles.actionMenuItem}
+                    onClick={(e) => handleEditSuggestionRequest(item.id!, e)}
+                  >
+                    <Edit3 size={14} />
+                    <span>Edit</span>
+                  </button>
+                  <button 
+                    className={`${styles.actionMenuItem} ${styles.deleteAction}`}
+                    onClick={(e) => handleDeleteSuggestionRequest(item.id!, e)}
+                    disabled={isDeletingSuggestionRequest}
+                  >
+                    <Trash2 size={14} />
+                    <span>{isDeletingSuggestionRequest ? 'Deleting...' : 'Delete'}</span>
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
         </button>
       </div>
     );

@@ -77,30 +77,35 @@ interface LeverageLoopsStore {
   isLoadingPersons: boolean;
   isLoadingSuggestionRequests: boolean;
   isCreatingSuggestionRequest: boolean;
+  isDeletingSuggestionRequest: boolean;
   // Separate error states for each operation
   personsError: string | null;
   suggestionRequestsError: string | null;
   createSuggestionRequestError: string | null;
+  deleteSuggestionRequestError: string | null;
   fetchNetworkPersons: () => Promise<void>;
   fetchSuggestionRequests: () => Promise<void>;
   setLeverageLoops: (leverageLoops: LeverageLoopPerson[]) => void;
   addLeverageLoops: (leverageLoops: LeverageLoopPerson[]) => void;
   createSuggestionRequest: (suggestionRequest: SuggestionRequest) => Promise<void>;
+  deleteSuggestionRequest: (suggestionRequestId: number) => Promise<void>;
 }
 
 export const useLeverageLoopsStore = create<LeverageLoopsStore>()(
   devtools(
-    (set, get) => ({
+    (set) => ({
       leverageLoops: [],
       suggestionRequests: [],
       // Separate loading states
       isLoadingPersons: false,
       isLoadingSuggestionRequests: false,
       isCreatingSuggestionRequest: false,
+      isDeletingSuggestionRequest: false,
       // Separate error states
       personsError: null,
       suggestionRequestsError: null,
       createSuggestionRequestError: null,
+      deleteSuggestionRequestError: null,
 
       fetchNetworkPersons: async () => {
         set({ isLoadingPersons: true, personsError: null });
@@ -210,11 +215,54 @@ export const useLeverageLoopsStore = create<LeverageLoopsStore>()(
             throw new Error(`HTTP ${response.status}: ${apiMessage}`);
           }
 
-          set({ suggestionRequests: [...get().suggestionRequests, data], isCreatingSuggestionRequest: false });
+          set((state) => ({ 
+            suggestionRequests: [data, ...state.suggestionRequests], 
+            isCreatingSuggestionRequest: false 
+          }));
         } catch (error) {
           set({
             createSuggestionRequestError: error instanceof Error ? error.message : 'Unknown error',
             isCreatingSuggestionRequest: false
+          });
+        }
+      },
+
+      deleteSuggestionRequest: async (suggestionRequestId: number) => {
+        set({ isDeletingSuggestionRequest: true, deleteSuggestionRequestError: null });
+        try {
+          const { token, baseUrl, dataSource } = useVariablesStore.getState();
+          
+          if (!baseUrl || (typeof baseUrl === 'string' && baseUrl.trim() === '')) {
+            throw new Error('Base URL is not defined. Please provide it as a prop to CopilotApp.');
+          }
+          if (!token || (typeof token === 'string' && token.trim() === '')) {
+            throw new Error('Token is not defined. Please provide it as a prop to CopilotApp.');
+          }
+          
+          const headers = {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`,
+            'x-data-source': dataSource || ''
+          };
+            
+          const response = await fetch(`${baseUrl}:MkA4QsNh/suggestion-requests/${suggestionRequestId}`, 
+            { headers, method: 'DELETE' }
+          );
+
+          if (!response.ok) {
+            const data = await response.json().catch(() => ({}));
+            const apiMessage = data?.message || data?.error || 'Failed to delete suggestion request';
+            throw new Error(`HTTP ${response.status}: ${apiMessage}`);
+          }
+
+          set((state) => ({ 
+            suggestionRequests: state.suggestionRequests.filter(sr => sr.id !== suggestionRequestId), 
+            isDeletingSuggestionRequest: false 
+          }));
+        } catch (error) {
+          set({
+            deleteSuggestionRequestError: error instanceof Error ? error.message : 'Unknown error',
+            isDeletingSuggestionRequest: false
           });
         }
       },
