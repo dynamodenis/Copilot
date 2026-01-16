@@ -86,7 +86,7 @@ export const SectionChat: React.FC<SectionChatProps> = ({
         }
         // If there's no SUMMARY section, just use the original content
         if (!summaryMatch) {
-          return cleanedContent = rawContent;
+          cleanedContent = rawContent;
         }
         
         return {

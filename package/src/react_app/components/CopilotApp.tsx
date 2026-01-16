@@ -42,7 +42,6 @@ export const CopilotApp: React.FC<CopilotAppProps> = ({
   // Note: setVariables is a stable reference from Zustand, so we don't need it in deps
   useLayoutEffect(() => {
     setVariables({ token, baseUrl, dataSource, user_id, copilot_llm_endpoint, user_name });
-    console.log("setVariables", token, baseUrl, dataSource, user_id, copilot_llm_endpoint);
   }, [token, baseUrl, dataSource, user_id, copilot_llm_endpoint, user_name]);
 
   // When you click on a section in the sidebar, you need to reset the copilot chat section contents
