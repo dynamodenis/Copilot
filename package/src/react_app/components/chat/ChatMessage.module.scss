@@ -39,6 +39,24 @@
   }
 }
 
+.assistantAvatar {
+  width: 28px;
+  height: 28px;
+  min-width: 28px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #2d2d3a 0%, #1a1a24 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 10px;
+  margin-top: 2px;
+
+  img {
+    width: 16px;
+    height: 16px;
+  }
+}
+
 .assistantMessage {
   max-width: 90%;
   color: var(--color-text-primary);

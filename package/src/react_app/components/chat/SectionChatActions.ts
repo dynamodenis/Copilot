@@ -131,8 +131,8 @@ export const createSectionChatActionHandler = (deps: ActionHandlerDependencies) 
           
           useLeverageLoopsStore.getState().createSuggestionRequest(suggestionRequest).then(() => {
             const { createSuggestionRequestError } = useLeverageLoopsStore.getState();
-            const content = createSuggestionRequestError
-              ? genUIContent({
+            if (createSuggestionRequestError) {
+              const content = genUIContent({
                   component: "Card",
                   props: {
                     children: [{
@@ -141,22 +141,24 @@ export const createSectionChatActionHandler = (deps: ActionHandlerDependencies) 
                     }]
                   }
                 })
-              : genUIContent({
-                  component: "Card",
-                  props: {
-                    children: [
-                      {
-                        component: "Header",
-                        props: { title: "✅ Suggestion Request Created", subtitle: `For ${personName}` }
-                      },
-                      {
-                        component: "TextContent",
-                        props: { textMarkdown: "Your suggestion request has been created successfully! You can view it in the sidebar under Leverage Loops." }
-                      }
-                    ]
-                  }
-                });
-            updateMessage(context, loadingMessageId, content, false, chatKey as string | undefined);
+                updateMessage(context, loadingMessageId, content, false, chatKey as string | undefined);
+              }
+              // : genUIContent({
+              //     component: "Card",
+              //     props: {
+              //       children: [
+              //         {
+              //           component: "Header",
+              //           props: { title: "✅ Suggestion Request Created", subtitle: `For ${personName}` }
+              //         },
+              //         {
+              //           component: "TextContent",
+              //           props: { textMarkdown: "Your suggestion request has been created successfully! You can view it in the sidebar under Leverage Loops." }
+              //         }
+              //       ]
+              //     }
+              //   });
+            // updateMessage(context, loadingMessageId, content, false, chatKey as string | undefined);
             
             // On success, navigate back to default leverage loop view
             if (!createSuggestionRequestError) {

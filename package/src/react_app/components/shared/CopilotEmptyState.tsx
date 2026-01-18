@@ -38,7 +38,7 @@ export const CopilotEmptyState: React.FC<CopilotEmptyStateProps> = ({
   };
 
   const displayName = user_name || "there";
-  const displayGreeting = greeting || `Ready to make magic today, ${displayName}`;
+  const displayGreeting = greeting || `Let's get after it, ${displayName}`;
   const displaySubtext = subtext || getCheekyMessage();
 
   return (

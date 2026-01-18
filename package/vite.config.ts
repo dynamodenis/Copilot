@@ -46,9 +46,12 @@ export default defineConfig({
     dedupe: ["react", "react-dom"],
   },
   server: {
-    hmr: true,
+    hmr: {
+      overlay: true,
+    },
     watch: {
       usePolling: true, // Helps on some systems (WSL, Docker, network drives)
+      interval: 100, // Polling interval in ms
     },
   },
 });

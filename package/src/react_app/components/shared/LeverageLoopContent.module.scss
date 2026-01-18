@@ -26,8 +26,54 @@
   gap: 8px;
   padding: 8px 12px;
   background: var(--color-hover-light);
-  border: 1px solid var(--color-border-subtle);
   border-radius: 6px;
+  position: relative;
+  z-index: 0;
+  
+  // Animated gradient border - only on the border, not the fill
+  &::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: 6px;
+    padding: 1.5px;
+    background: linear-gradient(
+      90deg,
+      rgba(232, 121, 249, 0.8) 0%,
+      rgba(168, 85, 247, 0.6) 25%,
+      rgba(99, 102, 241, 0.4) 50%,
+      rgba(168, 85, 247, 0.6) 75%,
+      rgba(232, 121, 249, 0.8) 100%
+    );
+    background-size: 200% 100%;
+    -webkit-mask: 
+      linear-gradient(#fff 0 0) content-box, 
+      linear-gradient(#fff 0 0);
+    mask: 
+      linear-gradient(#fff 0 0) content-box, 
+      linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    animation: borderGlow 2s linear infinite;
+    z-index: -1;
+    pointer-events: none;
+  }
+
+  &:focus-within {
+    &::before {
+      animation: none;
+      background: rgba(232, 121, 249, 0.6);
+    }
+  }
+}
+
+@keyframes borderGlow {
+  0% {
+    background-position: 0% 50%;
+  }
+  100% {
+    background-position: 200% 50%;
+  }
 }
 
 .searchDropdown {

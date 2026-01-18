@@ -1,6 +1,7 @@
 import React, { useMemo, useCallback } from "react";
 import styles from "./ChatMessage.module.scss";
 import type { ChatMessage as ChatMessageType, ActionEvent } from "./types";
+import orbiterLogo from "@/react_app/assets/sidebar/Orbiter logo.svg";
 import { 
   GenUIRenderer,
   StreamingGenUIRenderer,
@@ -132,16 +133,21 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
           <p>{message.content}</p>
         </div>
       ) : isAssistant ? (
-        <div className={styles.assistantMessage}>
-          {message.isStreaming && !message.content && (
-            <div className={styles.streamingIndicator}>
-              <span></span>
-              <span></span>
-              <span></span>
-            </div>
-          )}
-          {renderAssistantContent()}
-        </div>
+        <>
+          <div className={styles.assistantAvatar}>
+            <img src={orbiterLogo} alt="Orbiter" />
+          </div>
+          <div className={styles.assistantMessage}>
+            {message.isStreaming && !message.content && (
+              <div className={styles.streamingIndicator}>
+                <span></span>
+                <span></span>
+                <span></span>
+              </div>
+            )}
+            {renderAssistantContent()}
+          </div>
+        </>
       ) : null}
     </div>
   );

@@ -19,6 +19,7 @@ interface SectionChatProps {
   title: string;
   subtitle?: string;
   systemPrompt?: string;
+  showComposer?: boolean;
 }
 
 /**
@@ -29,9 +30,8 @@ interface SectionChatProps {
  */
 export const SectionChat: React.FC<SectionChatProps> = ({
   context,
-  title,
-  subtitle,
   systemPrompt,
+  showComposer = true,
 }) => {
   const {
     chatState,
@@ -294,11 +294,6 @@ export const SectionChat: React.FC<SectionChatProps> = ({
 
   return (
     <div className={styles.chatContainer}>
-      {/* Header */}
-      <div className={styles.header}>
-        <h1>{title}</h1>
-        {subtitle && <p className={styles.subtitle}>{subtitle}</p>}
-      </div>
 
       {shouldShowLeverageLoopSummaryCard && (
         <LeverageLoopSummary
@@ -311,12 +306,7 @@ export const SectionChat: React.FC<SectionChatProps> = ({
       <div className={styles.messagesContainer}>
         {messages.length === 0 ? (
           context === "copilot" ? (
-            <CopilotEmptyState />
-          ) : context === "leverage-loops" && !selectedPerson && !selectedSuggestionRequest ? (
-            <CopilotEmptyState 
-              greeting="I'm your Leverage Loop Assistant"
-              subtext="Select a person or suggestion request from the sidebar to get started"
-            />
+            <CopilotEmptyState  subtext="What can I help you with today?"/>
           ) : (
             <div className={styles.emptyState}>
               <p>Start a conversation</p>
@@ -336,7 +326,7 @@ export const SectionChat: React.FC<SectionChatProps> = ({
       </div>
 
       {/* Input */}
-      <ChatComposer onSend={sendMessage} disabled={isLoading} />
+      {showComposer && <ChatComposer onSend={sendMessage} disabled={isLoading} />}
 
       {/* Edit Modal */}
       {pendingAction && (
