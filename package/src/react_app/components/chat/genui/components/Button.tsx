@@ -7,6 +7,7 @@ export const Button: React.FC<ButtonProps> = ({
   name,
   variant = 'primary',
   disabled = false,
+  selected = false,
   action,
   onAction,
 }) => {
@@ -30,10 +31,15 @@ export const Button: React.FC<ButtonProps> = ({
     submitKeywords.some(keyword => nameStr.includes(keyword)) ||
     submitKeywords.some(keyword => childrenStr.includes(keyword));
 
+  const buttonClasses = [
+    styles.button,
+    styles[variant],
+    selected ? styles.selected : ''
+  ].filter(Boolean).join(' ');
 
   return (
     <button
-      className={`${styles.button} ${styles[variant]}`}
+      className={buttonClasses}
       disabled={disabled}
       onClick={handleClick}
       type={isSubmitButton ? 'submit' : 'button'}

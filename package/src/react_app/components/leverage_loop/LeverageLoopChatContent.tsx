@@ -1,26 +1,17 @@
 import type { LeverageLoopPerson, SuggestionRequest } from "@/react_app/store/leverageLoopsStore";
 
-export const leverageLoopInitialSectionContentPrompt = (person: LeverageLoopPerson) => {
+// Action type constants for tracking selected buttons
+export const LEVERAGE_LOOP_ACTIONS = {
+  SUGGEST_PEOPLE: "create_suggestion_request",
+  HELP_WITH_TASK: "add_assistant_message",
+} as const;
+
+export const leverageLoopInitialSectionContentPrompt = (person: LeverageLoopPerson, selectedActionType?: string | null) => {
   return {
     component: {
       component: "Card",
       props: {
         children: [
-          // {
-          //   component: "Header",
-          //   props: {
-          //     title: `Leverage your network to benefit ${person.full_name}`,
-          //     subtitle: person.master_person?.current_title 
-          //       ? `${person.master_person.current_title} · ${person.master_person?.master_company?.company_name || ''}`
-          //       : ''
-          //   }
-          // },
-          // {
-          //   component: "TextContent",
-          //   props: {
-          //     textMarkdown: `I'm here to help you make the most of your connection with **${person.full_name}**. What would you like to do?`
-          //   }
-          // },
           {
             component: "ButtonGroup",
             props: {
@@ -31,6 +22,7 @@ export const leverageLoopInitialSectionContentPrompt = (person: LeverageLoopPers
                   props: {
                     children: "Suggest people to introduce to " + person.full_name,
                     variant: "secondary",
+                    selected: selectedActionType === LEVERAGE_LOOP_ACTIONS.SUGGEST_PEOPLE,
                     action: {
                       type: "create_suggestion_request",
                       props: {
@@ -49,6 +41,7 @@ export const leverageLoopInitialSectionContentPrompt = (person: LeverageLoopPers
                   props: {
                     children: "Help " + person.full_name + " with a specific task",
                     variant: "secondary",
+                    selected: selectedActionType === LEVERAGE_LOOP_ACTIONS.HELP_WITH_TASK,
                     action: {
                       type: "add_assistant_message",
                       props: {

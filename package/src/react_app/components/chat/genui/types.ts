@@ -60,6 +60,7 @@ export interface ButtonProps extends BaseGenUIProps {
   name?: string;
   variant?: 'primary' | 'secondary' | 'ghost';
   disabled?: boolean;
+  selected?: boolean;
   action?: ActionProps;
 }
 

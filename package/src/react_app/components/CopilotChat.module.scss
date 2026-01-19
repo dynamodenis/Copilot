@@ -131,11 +131,11 @@
 .summaryCard {
   background: var(--genui-card-bg, rgba(255, 255, 255, 0.03));
   border: 1px solid var(--genui-border, rgba(255, 255, 255, 0.08));
-  border-radius: 14px;
-  padding: 16px;
+  border-radius: 10px;
+  padding: 8px;
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 5px;
   background-color: var(--color-sidebar-background);
 }
 
@@ -148,7 +148,7 @@
 
 .summaryCardTitle {
   margin: 0;
-  font-size: 16px;
+  font-size: 14px;
   font-weight: 600;
   color: var(--color-text-primary);
   flex: 1;
@@ -174,12 +174,16 @@
 
 .summaryTextarea {
   flex: 1;
-  padding: 10px 14px;
+  padding: 10px 10px;
   border: 1px solid var(--genui-border, rgba(255, 255, 255, 0.12));
-  border-radius: 8px;
-  background: rgba(255, 255, 255, 0.05);
+  border-radius: 10px;
+  background: linear-gradient(
+    to right,
+    rgba(232, 121, 249, 0.20) 0%,
+    rgba(10, 10, 10, 0.10) 100%
+  );
   color: var(--color-text-primary);
-  font-size: 14px;
+  font-size: 12px;
   font-family: inherit;
   outline: none;
   transition: all 0.15s ease;
@@ -192,8 +196,12 @@
   }
 
   &:focus {
-    border-color: var(--genui-primary, #6366f1);
-    background: rgba(255, 255, 255, 0.08);
+    // border-color: rgba(232, 121, 249, 0.5);
+    background: linear-gradient(
+      to right,
+      rgba(232, 121, 249, 0.30) 0%,
+      rgba(10, 10, 10, 0.15) 100%
+    );
   }
 }
 
@@ -201,8 +209,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 30px;
-  height: 30px;
+  width: 25px;
+  height: 25px;
   padding: 0;
   border: 1px solid var(--genui-border, rgba(255, 255, 255, 0.12));
   border-radius: 8px;

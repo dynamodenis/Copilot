@@ -3,12 +3,40 @@ import type { ChatContext, ChatMessageType } from "@/react_app/store/chatContext
 import { useChatContextStore } from "@/react_app/store/chatContextStore";
 import { useLeverageLoopsStore } from "@/react_app/store/leverageLoopsStore";
 import { useVariablesStore } from "@/react_app/store/variablesStore";
+import { leverageLoopInitialSectionContentPrompt } from "../leverage_loop/LeverageLoopChatContent";
 
 // Helper to wrap GenUI content
 const genUIContent = (component: unknown) => `<content thesys="true">${JSON.stringify({ component, error: null })}</content>`;
 
 // Generate unique IDs
 const generateId = () => `msg-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+
+// Helper to update the initial buttons message with selected state
+const updateInitialButtonsMessage = (
+  chatKey: string,
+  selectedActionType: string,
+  context: ChatContext,
+  updateMessage: (context: ChatContext, messageId: string, content: string, isStreaming?: boolean, chatKey?: string) => void
+) => {
+  const { leverageLoopChats, selectedPerson } = useChatContextStore.getState();
+  const chat = leverageLoopChats[chatKey];
+  
+  if (!chat || !selectedPerson) return;
+  
+  // Find the initial assistant message with ButtonGroup (usually the 2nd or 3rd message)
+  const initialButtonsMessage = chat.messages.find(msg => 
+    msg.role === "assistant" && msg.content.includes("ButtonGroup")
+  );
+  
+  if (initialButtonsMessage) {
+    // Regenerate the content with the selected state
+    const updatedContent = `<content thesys="true">${JSON.stringify(
+      leverageLoopInitialSectionContentPrompt(selectedPerson, selectedActionType)
+    )}</content>`;
+    
+    updateMessage(context, initialButtonsMessage.id, updatedContent, false, chatKey);
+  }
+};
 
 export interface ActionHandlerDependencies {
   sendMessage: (content: string) => Promise<void>;
@@ -79,6 +107,12 @@ export const createSectionChatActionHandler = (deps: ActionHandlerDependencies) 
           const messageId = generateId();
           const chatKey = event.params.chatKey as string | undefined;
           
+          // Track the selected action for this chat and update the buttons
+          if (chatKey) {
+            useChatContextStore.getState().setSelectedAction(chatKey, "add_assistant_message");
+            updateInitialButtonsMessage(chatKey, "add_assistant_message", context, updateMessage);
+          }
+          
           // Support both raw content string or componentData object
           let content: string;
           if (event.params.componentData) {
@@ -101,6 +135,13 @@ export const createSectionChatActionHandler = (deps: ActionHandlerDependencies) 
       case "create_suggestion_request":
         if (event.params) {
           const { personName, personTitle, companyName, masterPersonId, chatKey } = event.params;
+          
+          // Track the selected action for this chat and update the buttons
+          if (chatKey) {
+            useChatContextStore.getState().setSelectedAction(chatKey as string, "create_suggestion_request");
+            updateInitialButtonsMessage(chatKey as string, "create_suggestion_request", context, updateMessage);
+          }
+          
           const { user_id } = useVariablesStore.getState();
           const suggestionRequest = {
             request_panel_title: `Suggestion Request for ${personName}`,

@@ -27,6 +27,9 @@ export interface ChatSummaryType {
 // Leverage loops uses keyed chat states - one per person/suggestion request
 export type LeverageLoopChats = Record<string, ChatState>;
 
+// Track which button action was selected per chat key
+export type SelectedActions = Record<string, string>;
+
 interface ChatContextStore {
   // Current active chat context
   activeContext: ChatContext;
@@ -36,6 +39,9 @@ interface ChatContextStore {
   selectedSuggestionRequest: SuggestionRequest | null;
 
   leverageLoopSummaries: ChatSummaryType[];
+  
+  // Track selected button action per chat (keyed by chatKey)
+  selectedActions: SelectedActions;
   
   // Separate chat states for each context
   copilotChat: ChatState;
@@ -48,6 +54,8 @@ interface ChatContextStore {
   setSelectedPerson: (person: LeverageLoopPerson | null) => void;
   setSelectedSuggestionRequest: (request: SuggestionRequest | null) => void;
   upsertLeverageLoopSummary: (summary: ChatSummaryType) => void;
+  setSelectedAction: (chatKey: string, actionType: string) => void;
+  getSelectedAction: (chatKey: string) => string | null;
 
   // Chat state actions
   addMessage: (context: ChatContext, message: ChatMessageType, chatKey?: string) => void;
@@ -80,6 +88,7 @@ export const useChatContextStore = create<ChatContextStore>()(
     selectedPerson: null,
     selectedSuggestionRequest: null,
     leverageLoopSummaries: [],
+    selectedActions: {},
     
     copilotChat: createInitialChatState("copilot"),
     outcomesChat: createInitialChatState("outcomes"),
@@ -243,6 +252,18 @@ export const useChatContextStore = create<ChatContextStore>()(
         };
       }
     }),
+
+    setSelectedAction: (chatKey, actionType) => set((state) => ({
+      selectedActions: {
+        ...state.selectedActions,
+        [chatKey]: actionType,
+      },
+    })),
+
+    getSelectedAction: (chatKey) => {
+      const state = get();
+      return state.selectedActions[chatKey] || null;
+    },
   }), { name: "ChatContextStore" })
 );
 
