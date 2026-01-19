@@ -1,13 +1,14 @@
 import { useState, useEffect } from "react";
 import { useShallow } from "zustand/react/shallow";
 import styles from "./CopilotSidebar.module.scss";
-import { LeverageLoopContent } from "./shared";
 
 import { useLeverageLoopsStore, type LeverageLoopPerson, type SuggestionRequest } from "@/react_app/store/leverageLoopsStore";
 import { useChatContextStore, type ChatMessageType } from "@/react_app/store/chatContextStore";
 import { useVariablesStore } from "@/react_app/store/variablesStore";
 import { generateId } from "./chat/SectionChat";
 import { leverageLoopInitialSectionContentPrompt, suggestionRequestInitialSectionContentPrompt } from "./leverage_loop/LeverageLoopChatContent";
+import { LeverageLoopSidebarContent } from "./leverage_loop/LeverageLoopSidebarContent";
+import { OutcomesSidebarContent } from "./outcome/OutcomesSidebarContent";
 
 import OrbiterLogo from "@/react_app/assets/sidebar/Orbiter logo.svg";
 import OutcomesLogo from "@/react_app/assets/sidebar/target-arrow.svg";
@@ -27,19 +28,19 @@ export const CopilotSidebar: React.FC<CopilotSidebarProps> = ({
   onSectionChangeConfiguration,
 }) => {
   // Leverage loops data store
-  const { leverageLoops: _leverageLoops, fetchNetworkPersons, fetchSuggestionRequests } = useLeverageLoopsStore(
+  const { fetchNetworkPersons, fetchSuggestionRequests, fetchOutcomesSuggestionRequests } = useLeverageLoopsStore(
     useShallow((state) => ({
-      leverageLoops: state.leverageLoops,
       fetchNetworkPersons: state.fetchNetworkPersons,
       fetchSuggestionRequests: state.fetchSuggestionRequests,
+      fetchOutcomesSuggestionRequests: state.fetchOutcomesSuggestionRequests,
     }))
   );
 
   // Chat context store for selections
-  const { 
-    selectedPerson, 
-    selectedSuggestionRequest, 
-    setSelectedPerson, 
+  const {
+    selectedPerson,
+    selectedSuggestionRequest,
+    setSelectedPerson,
     setSelectedSuggestionRequest,
     addMessage,
     leverageLoopChats,
@@ -62,11 +63,10 @@ export const CopilotSidebar: React.FC<CopilotSidebarProps> = ({
     }))
   );
 
-  const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set());
+  // Track which sidebar content sections are expanded
+  const [expandedSections, setExpandedSections] = useState<Set<SidebarSection>>(new Set());
 
-
-  const toggleSection = (sectionId: SidebarSection) => {
-
+  const toggleSectionExpanded = (sectionId: SidebarSection) => {
     setExpandedSections((prev) => {
       const newSet = new Set(prev);
       if (newSet.has(sectionId)) {
@@ -78,20 +78,18 @@ export const CopilotSidebar: React.FC<CopilotSidebarProps> = ({
     });
   };
 
-  const handleItemSelect = (item: LeverageLoopPerson) => {
+  // Handle person selection for leverage loops
+  const handlePersonSelect = (item: LeverageLoopPerson) => {
     setSelectedPerson(item);
-    // Navigate to leverage-loops chat
     onSectionChange("leverage-loops");
 
-    // Check if this person's chat already has an initial assistant message
     const chatKey = item.full_name;
     const existingChat = leverageLoopChats[chatKey];
     const hasInitialMessage = existingChat?.messages?.[0]?.role === "assistant";
 
-    // Only add the initial message if it doesn't already exist
     if (!hasInitialMessage) {
       const context = "leverage-loops";
-      // Add the asisstant message to ask the user to select a person
+      
       const initialAssistantMessage: ChatMessageType = {
         id: generateId(),
         role: "assistant",
@@ -101,7 +99,6 @@ export const CopilotSidebar: React.FC<CopilotSidebarProps> = ({
       };
       addMessage(context, initialAssistantMessage, chatKey);
 
-      // Add a message to the chat to say that the person is selected, the message role is user and the content is the person's name
       const userMessage: ChatMessageType = {
         id: generateId(),
         role: "user",
@@ -111,10 +108,7 @@ export const CopilotSidebar: React.FC<CopilotSidebarProps> = ({
       };
       addMessage(context, userMessage, chatKey);
 
-      // Add the buttons
       const responseId = generateId();
-
-      // Wrap in thesys content tag
       const content = `<content thesys="true">${JSON.stringify(leverageLoopInitialSectionContentPrompt(item))}</content>`;
 
       const assistantMessage: ChatMessageType = {
@@ -129,22 +123,46 @@ export const CopilotSidebar: React.FC<CopilotSidebarProps> = ({
     }
   };
 
-  const handleSuggestionRequestSelect = (suggestionRequest: SuggestionRequest) => {
+  // Handle suggestion request selection for leverage loops
+  const handleLeverageLoopSuggestionRequestSelect = (suggestionRequest: SuggestionRequest) => {
     setSelectedSuggestionRequest(suggestionRequest);
-    // Navigate to leverage-loops chat
     onSectionChange("leverage-loops");
 
-    // Check if this person's chat already has an initial assistant message
     const chatKey = suggestionRequest.request_panel_title;
     const existingChat = leverageLoopChats[chatKey];
     const hasInitialMessage = existingChat?.messages?.[0]?.role === "assistant";
 
-    // Only add the initial message if it doesn't already exist
     if (!hasInitialMessage) {
       const context = "leverage-loops";
       const responseId = generateId();
 
-      // Wrap in thesys content tag
+      const content = `<content thesys="true">${JSON.stringify(suggestionRequestInitialSectionContentPrompt(suggestionRequest))}</content>`;
+
+      const assistantMessage: ChatMessageType = {
+        id: responseId,
+        role: "assistant",
+        content: content,
+        timestamp: new Date(),
+        isStreaming: false,
+      };
+
+      addMessage(context, assistantMessage, chatKey);
+    }
+  };
+
+  // Handle suggestion request selection for outcomes
+  const handleOutcomesSuggestionRequestSelect = (suggestionRequest: SuggestionRequest) => {
+    setSelectedSuggestionRequest(suggestionRequest);
+    onSectionChange("outcomes");
+
+    const chatKey = suggestionRequest.request_panel_title;
+    const existingChat = leverageLoopChats[chatKey];
+    const hasInitialMessage = existingChat?.messages?.[0]?.role === "assistant";
+
+    if (!hasInitialMessage) {
+      const context = "outcomes";
+      const responseId = generateId();
+
       const content = `<content thesys="true">${JSON.stringify(suggestionRequestInitialSectionContentPrompt(suggestionRequest))}</content>`;
 
       const assistantMessage: ChatMessageType = {
@@ -164,8 +182,9 @@ export const CopilotSidebar: React.FC<CopilotSidebarProps> = ({
     if (token && baseUrl) {
       fetchNetworkPersons();
       fetchSuggestionRequests();
+      fetchOutcomesSuggestionRequests();
     }
-  }, [token, baseUrl, fetchNetworkPersons, fetchSuggestionRequests]);
+  }, [token, baseUrl, fetchNetworkPersons, fetchSuggestionRequests, fetchOutcomesSuggestionRequests]);
 
   return (
     <div className={styles.sidebar}>
@@ -197,7 +216,7 @@ export const CopilotSidebar: React.FC<CopilotSidebarProps> = ({
             </button>
             <button
               className={styles.plusButton}
-              onClick={() => toggleSection("outcomes")}
+              onClick={() => toggleSectionExpanded("outcomes")}
               aria-label="Expand Outcomes"
             >
               <span className={`${styles.plusIcon} ${expandedSections.has("outcomes") ? styles.rotated : ""}`}>
@@ -205,14 +224,6 @@ export const CopilotSidebar: React.FC<CopilotSidebarProps> = ({
               </span>
             </button>
           </div>
-          {/* {expandedSections.has("outcomes") && (
-            <ExpandableContent
-              contentType="outcomes"
-              items={outcomesData}
-              selectedItemId={selectedItem}
-              onItemSelect={handleItemSelect}
-            />
-          )} */}
         </div>
 
         {/* Leverage Loops Section */}
@@ -230,7 +241,7 @@ export const CopilotSidebar: React.FC<CopilotSidebarProps> = ({
             </button>
             <button
               className={styles.plusButton}
-              onClick={() => toggleSection("leverage-loops")}
+              onClick={() => toggleSectionExpanded("leverage-loops")}
               aria-label="Expand Leverage Loops"
             >
               <span className={`${styles.plusIcon} ${expandedSections.has("leverage-loops") ? styles.rotated : ""}`}>
@@ -238,17 +249,25 @@ export const CopilotSidebar: React.FC<CopilotSidebarProps> = ({
               </span>
             </button>
           </div>
+        </div>
+
+        <div>
           {expandedSections.has("leverage-loops") && (
-            <LeverageLoopContent
-              contentType="leverage-loops"
-              items={_leverageLoops}
-              selectedItem={selectedPerson}
-              selectedSuggestionRequest={selectedSuggestionRequest}   
-              onItemSelect={handleItemSelect}
-              onSuggestionRequestSelect={handleSuggestionRequestSelect}
+            <LeverageLoopSidebarContent
+              selectedPerson={selectedPerson}
+              selectedSuggestionRequest={selectedSuggestionRequest}
+              onPersonSelect={handlePersonSelect}
+              onSuggestionRequestSelect={handleLeverageLoopSuggestionRequestSelect}
+            />
+          )}
+          {expandedSections.has("outcomes") && (
+            <OutcomesSidebarContent
+              selectedSuggestionRequest={selectedSuggestionRequest}
+              onSuggestionRequestSelect={handleOutcomesSuggestionRequestSelect}
             />
           )}
         </div>
+
       </nav>
     </div>
   );

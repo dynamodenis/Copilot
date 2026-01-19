@@ -49,6 +49,13 @@ export interface LeverageLoopPerson {
   master_person: MasterPerson;
 }
 
+export interface OutcomeStepPlan {
+  id: number;
+  status: "planned" | "in progress" | "complete";
+  step_type: string;
+  step_description: string;
+}
+
 export interface SuggestionRequest {
   id?: number;
   created_at?: number;
@@ -62,17 +69,18 @@ export interface SuggestionRequest {
   leverage_loop_suggestions?: any[];
   leverage_loop_suggestion_count?: number;
   outcome_suggestions?: any[];
-  outcome_plan_steps?: any[];
   outcome_suggestion_count?: number;
   parent_suggestion_context?: string | null;
   master_person_id: number;
   // Person fields (populated from master_person)
   master_person?: MasterPerson;
+  outcome_plan_steps?: OutcomeStepPlan[];
 }
 
 interface LeverageLoopsStore {
   leverageLoops: LeverageLoopPerson[];
   suggestionRequests: SuggestionRequest[];
+  outcomesSuggestionRequests: SuggestionRequest[];
   // Separate loading states for each operation
   isLoadingPersons: boolean;
   isLoadingSuggestionRequests: boolean;
@@ -85,6 +93,7 @@ interface LeverageLoopsStore {
   deleteSuggestionRequestError: string | null;
   fetchNetworkPersons: () => Promise<void>;
   fetchSuggestionRequests: () => Promise<void>;
+  fetchOutcomesSuggestionRequests: () => Promise<void>;
   setLeverageLoops: (leverageLoops: LeverageLoopPerson[]) => void;
   addLeverageLoops: (leverageLoops: LeverageLoopPerson[]) => void;
   createSuggestionRequest: (suggestionRequest: SuggestionRequest) => Promise<void>;
@@ -96,6 +105,7 @@ export const useLeverageLoopsStore = create<LeverageLoopsStore>()(
     (set) => ({
       leverageLoops: [],
       suggestionRequests: [],
+      outcomesSuggestionRequests: [],
       // Separate loading states
       isLoadingPersons: false,
       isLoadingSuggestionRequests: false,
@@ -175,6 +185,43 @@ export const useLeverageLoopsStore = create<LeverageLoopsStore>()(
           }
           set({ suggestionRequests: data?.items ?? [], isLoadingSuggestionRequests: false });
 
+        } catch (error) {
+          set({
+            suggestionRequestsError: error instanceof Error ? error.message : 'Unknown error',
+            isLoadingSuggestionRequests: false
+          });
+        }
+      },
+
+      fetchOutcomesSuggestionRequests: async () => {
+        set({ isLoadingSuggestionRequests: true, suggestionRequestsError: null });
+        try {
+          const { token, baseUrl, dataSource } = useVariablesStore.getState();
+          
+          if (!baseUrl || (typeof baseUrl === 'string' && baseUrl.trim() === '')) {
+            console.error('VariablesStore state:', useVariablesStore.getState());
+            throw new Error('Base URL is not defined. Please provide it as a prop to CopilotApp.');
+          }
+          if (!token || (typeof token === 'string' && token.trim() === '')) {
+            console.error('VariablesStore state:', useVariablesStore.getState());
+            throw new Error('Token is not defined. Please provide it as a prop to CopilotApp.');
+          }
+          
+          const headers = {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`,
+            'x-data-source': dataSource || ''
+          };
+          const response = await fetch(`${baseUrl}:MkA4QsNh/suggestion-requests?copilot_mode=outcome`, { headers });
+          
+          const data = await response.json();
+          
+          if (!response.ok) {
+            const apiMessage = data?.message || data?.error || 'Failed to fetch suggestion requests';
+            const errorMessage = `HTTP ${response.status}: ${apiMessage}`;
+            throw new Error(errorMessage);
+          }
+          set({ outcomesSuggestionRequests: data?.items ?? [], isLoadingSuggestionRequests: false });
         } catch (error) {
           set({
             suggestionRequestsError: error instanceof Error ? error.message : 'Unknown error',

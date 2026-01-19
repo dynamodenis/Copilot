@@ -69,7 +69,6 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
   height: 100%;
   padding: 48px 24px;
   text-align: center;
@@ -203,6 +202,7 @@
       rgba(10, 10, 10, 0.15) 100%
     );
   }
+  
 }
 
 .summaryCardButton {
