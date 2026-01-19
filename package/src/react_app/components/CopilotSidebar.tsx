@@ -91,6 +91,27 @@ export const CopilotSidebar: React.FC<CopilotSidebarProps> = ({
     // Only add the initial message if it doesn't already exist
     if (!hasInitialMessage) {
       const context = "leverage-loops";
+      // Add the asisstant message to ask the user to select a person
+      const initialAssistantMessage: ChatMessageType = {
+        id: generateId(),
+        role: "assistant",
+        content: "Select a person from your contacts to assist with your network.",
+        timestamp: new Date(),
+        isStreaming: false,
+      };
+      addMessage(context, initialAssistantMessage, chatKey);
+
+      // Add a message to the chat to say that the person is selected, the message role is user and the content is the person's name
+      const userMessage: ChatMessageType = {
+        id: generateId(),
+        role: "user",
+        content: `${item.full_name} \n ${item.master_person?.current_title} at ${item.master_person?.master_company?.company_name}`,
+        timestamp: new Date(),
+        isStreaming: false,
+      };
+      addMessage(context, userMessage, chatKey);
+
+      // Add the buttons
       const responseId = generateId();
 
       // Wrap in thesys content tag

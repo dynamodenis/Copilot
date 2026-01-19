@@ -6,21 +6,21 @@ export const leverageLoopInitialSectionContentPrompt = (person: LeverageLoopPers
       component: "Card",
       props: {
         children: [
-          {
-            component: "Header",
-            props: {
-              title: `Leverage your network to benefit ${person.full_name}`,
-              subtitle: person.master_person?.current_title 
-                ? `${person.master_person.current_title} · ${person.master_person?.master_company?.company_name || ''}`
-                : ''
-            }
-          },
-          {
-            component: "TextContent",
-            props: {
-              textMarkdown: `I'm here to help you make the most of your connection with **${person.full_name}**. What would you like to do?`
-            }
-          },
+          // {
+          //   component: "Header",
+          //   props: {
+          //     title: `Leverage your network to benefit ${person.full_name}`,
+          //     subtitle: person.master_person?.current_title 
+          //       ? `${person.master_person.current_title} · ${person.master_person?.master_company?.company_name || ''}`
+          //       : ''
+          //   }
+          // },
+          // {
+          //   component: "TextContent",
+          //   props: {
+          //     textMarkdown: `I'm here to help you make the most of your connection with **${person.full_name}**. What would you like to do?`
+          //   }
+          // },
           {
             component: "ButtonGroup",
             props: {
