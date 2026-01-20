@@ -24,10 +24,10 @@ export const OutcomeChatSummary: React.FC<OutcomeChatSummaryProps> = ({
 
   // Load existing summary when outcome changes
   useEffect(() => {
-    let summaryId: string | null = null;
+    let summaryId: string = "outcomes-summary";
     
     if (selectedSuggestionRequest) {
-      summaryId = selectedSuggestionRequest.request_panel_title || selectedSuggestionRequest.request_header_title || null;
+      summaryId = selectedSuggestionRequest.request_panel_title || selectedSuggestionRequest.request_header_title;
     }
     
     if (summaryId) {

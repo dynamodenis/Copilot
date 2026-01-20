@@ -54,7 +54,7 @@ export const OutcomesChat: React.FC = () => {
     if (selectedSuggestionRequest) {
       return `You are helping with the outcomes suggestion request: "${selectedSuggestionRequest.request_header_title}". Context: ${selectedSuggestionRequest.request_context}`;
     }
-    return "You are helping the user manage their leverage loops and professional network.";
+    return "You are helping the user manage their outcomes towards certain goals.";
   };
 
   return (

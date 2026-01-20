@@ -206,7 +206,7 @@ export const CopilotSidebar: React.FC<CopilotSidebarProps> = ({
           <div className={`${styles.sectionHeader} ${activeSection === "outcomes" ? styles.active : ""}`}>
             <button
               className={styles.sidebarItemInHeader}
-              onClick={() => onSectionChange("outcomes")}
+              onClick={() => onSectionChangeConfiguration("outcomes")}
               aria-label="Outcomes"
             >
               <span className={styles.sidebarIcon}>

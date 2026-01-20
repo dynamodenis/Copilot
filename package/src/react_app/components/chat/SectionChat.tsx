@@ -12,6 +12,7 @@ import { LeverageLoopSummary } from "../leverage_loop/LeverageLoopChatSummary";
 import { OutcomeChatSummary } from "../outcome/OutcomeChatSummary";
 import { CopilotEmptyState } from "../shared/CopilotEmptyState";
 import styles from "../CopilotChat.module.scss";
+
 // Generate unique IDs
 export const generateId = () => `msg-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
 
@@ -42,6 +43,7 @@ export const SectionChat: React.FC<SectionChatProps> = ({
     updateMessage,
     setIsLoading,
     upsertLeverageLoopSummary,
+    upsertOutcomesSummary,
     selectedPerson,
     selectedSuggestionRequest,
   } = useChatContextStore(
@@ -58,6 +60,7 @@ export const SectionChat: React.FC<SectionChatProps> = ({
         updateMessage: state.updateMessage,
         setIsLoading: state.setIsLoading,
         upsertLeverageLoopSummary: state.upsertLeverageLoopSummary,
+        upsertOutcomesSummary: state.upsertOutcomesSummary,
         selectedPerson: state.selectedPerson,
         selectedSuggestionRequest: state.selectedSuggestionRequest,
       };
@@ -68,6 +71,7 @@ export const SectionChat: React.FC<SectionChatProps> = ({
     // Extract the SUMMARY section
 
       const summaryMatch = rawContent.match(/\[SUMMARY\](.*?)\[\/SUMMARY\]/s);
+
       let summary = null;
       if (summaryMatch && summaryMatch[1]) {
         summary = summaryMatch[1].trim();
@@ -77,6 +81,9 @@ export const SectionChat: React.FC<SectionChatProps> = ({
         
         if (summary && context === "leverage-loops") {
           updateLeverageLoopSummary(summary);
+        }
+        if (summary && context === "outcomes") {
+          updateOutcomesSummary(summary);
         }
         // If there's no SUMMARY section, just use the original content
         if (!summaryMatch) {
@@ -115,6 +122,16 @@ export const SectionChat: React.FC<SectionChatProps> = ({
       });
     }
   }, [context, selectedPerson, selectedSuggestionRequest, upsertLeverageLoopSummary]);
+
+  // Update outcomes summary in the store
+  const updateOutcomesSummary = useCallback((summary: string) => {
+    if (context == "copilot") return;
+      upsertOutcomesSummary({
+        id: "outcomes-summary",
+        content: summary,
+        timestamp: new Date(),
+      });
+  }, [context, upsertOutcomesSummary]);
 
   const { messages, threadId, isLoading } = chatState;
 
