@@ -37,7 +37,9 @@ export const OutcomesSidebarContent: React.FC<OutcomesSidebarContentProps> = ({
   const [searchQuery, setSearchQuery] = useState("");
   const [expandedOutcomes, setExpandedOutcomes] = useState<Set<number>>(new Set());
   const [openMenuId, setOpenMenuId] = useState<number | null>(null);
+  const [openStepMenuId, setOpenStepMenuId] = useState<number | null>(null);
   const menuRef = useRef<HTMLDivElement>(null);
+  const stepMenuRef = useRef<HTMLDivElement>(null);
 
   const {
     outcomesSuggestionRequests,
@@ -60,6 +62,9 @@ export const OutcomesSidebarContent: React.FC<OutcomesSidebarContentProps> = ({
     const handleClickOutside = (event: MouseEvent) => {
       if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
         setOpenMenuId(null);
+      }
+      if (stepMenuRef.current && !stepMenuRef.current.contains(event.target as Node)) {
+        setOpenStepMenuId(null);
       }
     };
 
@@ -94,6 +99,19 @@ export const OutcomesSidebarContent: React.FC<OutcomesSidebarContentProps> = ({
     setOpenMenuId(null);
   };
 
+  const handleDeleteStepPlan = async (id: number, e: React.MouseEvent) => {
+    e.stopPropagation();
+    // TODO: Implement step plan deletion when API is ready
+    console.log("Delete step plan:", id);
+    setOpenStepMenuId(null);
+  };
+
+  const handleEditStepPlan = (id: number, e: React.MouseEvent) => {
+    e.stopPropagation();
+    console.log("Edit step plan:", id);
+    setOpenStepMenuId(null);
+  };
+
   const toggleOutcomeExpanded = (outcomeId: number, e: React.MouseEvent) => {
     e.stopPropagation();
     setExpandedOutcomes((prev) => {
@@ -116,44 +134,44 @@ export const OutcomesSidebarContent: React.FC<OutcomesSidebarContentProps> = ({
           <span className={styles.stepPlanDescription}>{step.step_description}</span>
         </div>
 
-        <span
-          className={styles.moreButton}
-          role="button"
-          tabIndex={0}
-          onClick={(e) => {
-            e.stopPropagation();
-            setOpenMenuId(openMenuId === step.id ? null : step.id!);
-          }}
-          onKeyDown={(e) => {
-            if (e.key === "Enter") {
+        <div className={styles.moreButtonWrapper} ref={openStepMenuId === step.id ? stepMenuRef : null}>
+          <span
+            className={styles.moreButton}
+            role="button"
+            tabIndex={0}
+            onClick={(e) => {
               e.stopPropagation();
-              setOpenMenuId(openMenuId === step.id ? null : step.id!);
-            }
-          }}
-        >
-          ⋮
-        </span>
+              setOpenStepMenuId(openStepMenuId === step.id ? null : step.id!);
+            }}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                e.stopPropagation();
+                setOpenStepMenuId(openStepMenuId === step.id ? null : step.id!);
+              }
+            }}
+          >
+            ⋮
+          </span>
 
-        {openMenuId === step.id && (
-          <div className={styles.actionMenu}>
-            <button
-              className={styles.actionMenuItem}
-              onClick={(e) => handleEditOutcome(step.id!, e)}
-            >
-              <Edit3 size={14} />
-              <span>Edit</span>
-            </button>
-            <button
-              className={`${styles.actionMenuItem} ${styles.deleteAction}`}
-              onClick={(e) => handleDeleteOutcome(step.id!, e)}
-              disabled={isDeletingSuggestionRequest}
-            >
-              <Trash2 size={14} />
-              <span>{isDeletingSuggestionRequest ? "Deleting..." : "Delete"}</span>
-            </button>
-          </div>
-        )}
-
+          {openStepMenuId === step.id && (
+            <div className={styles.actionMenu}>
+              <button
+                className={styles.actionMenuItem}
+                onClick={(e) => handleEditStepPlan(step.id!, e)}
+              >
+                <Edit3 size={14} />
+                <span>Edit</span>
+              </button>
+              <button
+                className={`${styles.actionMenuItem} ${styles.deleteAction}`}
+                onClick={(e) => handleDeleteStepPlan(step.id!, e)}
+              >
+                <Trash2 size={14} />
+                <span>Delete</span>
+              </button>
+            </div>
+          )}
+        </div>
       </div>
     );
   };

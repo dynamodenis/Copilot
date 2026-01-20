@@ -1,4 +1,4 @@
-import React, { useCallback, useRef, useEffect } from "react";
+import React, { useCallback, useRef, useEffect, useState } from "react";
 import { useShallow } from "zustand/react/shallow";
 import { ChatComposer } from "./ChatComposer";
 import { ChatMessage } from "./ChatMessage";
@@ -9,6 +9,7 @@ import { useVariablesStore } from "@/react_app/store/variablesStore";
 import { createSectionChatActionHandler } from "./SectionChatActions";
 import { getComponentInstruction } from "./genui/componentConfig";
 import { LeverageLoopSummary } from "../leverage_loop/LeverageLoopChatSummary";
+import { OutcomeChatSummary } from "../outcome/OutcomeChatSummary";
 import { CopilotEmptyState } from "../shared/CopilotEmptyState";
 import styles from "../CopilotChat.module.scss";
 // Generate unique IDs
@@ -33,6 +34,8 @@ export const SectionChat: React.FC<SectionChatProps> = ({
   systemPrompt,
   showComposer = true,
 }) => {
+  const getInitialPlaceholder = () => context === "outcomes" ? "Describe your goal ..." : "Ask anything ...";
+  const [placeholder, setPlaceholder] = useState(getInitialPlaceholder);
   const {
     chatState,
     addMessage,
@@ -43,22 +46,14 @@ export const SectionChat: React.FC<SectionChatProps> = ({
     selectedSuggestionRequest,
   } = useChatContextStore(
     useShallow((state) => {
-      // For leverage-loops, use the keyed chat state based on current selection
-      if (context === "leverage-loops") {
-        return {
-          chatState: state.getCurrentLeverageLoopChat(),
-          addMessage: state.addMessage,
-          updateMessage: state.updateMessage,
-          setIsLoading: state.setIsLoading,
-          upsertLeverageLoopSummary: state.upsertLeverageLoopSummary,
-          selectedPerson: state.selectedPerson,
-          selectedSuggestionRequest: state.selectedSuggestionRequest,
-        };
-      }
-      
-      const chatKey = context === "copilot" ? "copilotChat" : "outcomesChat";
+      // Get chatState based on context
+      const chatState = 
+        context === "leverage-loops" ? state.getCurrentLeverageLoopChat() :
+        context === "outcomes" ? state.getCurrentOutcomesChat() :
+        state.copilotChat;
+
       return {
-        chatState: state[chatKey],
+        chatState,
         addMessage: state.addMessage,
         updateMessage: state.updateMessage,
         setIsLoading: state.setIsLoading,
@@ -103,7 +98,7 @@ export const SectionChat: React.FC<SectionChatProps> = ({
    * Update leverage loop summary in the store
    */
   const updateLeverageLoopSummary = useCallback((summary: string) => {
-    if (context !== "leverage-loops") return;
+    if (context == "copilot") return;
     
     let summaryId: string | null = null;
     if (selectedPerson) {
@@ -122,9 +117,21 @@ export const SectionChat: React.FC<SectionChatProps> = ({
   }, [context, selectedPerson, selectedSuggestionRequest, upsertLeverageLoopSummary]);
 
   const { messages, threadId, isLoading } = chatState;
+
+  // Dynamically update placeholder based on context and messages
+  useEffect(() => {
+    if (messages.length >= 3 && messages[2]?.role === "assistant") {
+      setPlaceholder("Reply ...");
+    } else {
+      setPlaceholder(context === "outcomes" ? "Describe your goal ..." : "Ask anything ...");
+    }
+  }, [context, messages]);
   
   // Leverage loop summary card should show if there are messages and no person or suggestion request is selected and the last message is not a system message
-  const shouldShowLeverageLoopSummaryCard = context === "leverage-loops" && messages.length > 1 ;
+  const shouldShowLeverageLoopSummaryCard = context === "leverage-loops" && messages.length > 1;
+  
+  // Outcomes summary card should show if there are messages in outcomes context
+  const shouldShowOutcomesSummaryCard = context === "outcomes";
   
   // Modal state for editing form submissions
   const [isModalOpen, setIsModalOpen] = React.useState(false);
@@ -302,6 +309,13 @@ export const SectionChat: React.FC<SectionChatProps> = ({
         />
       )}
 
+      {shouldShowOutcomesSummaryCard && (
+        <OutcomeChatSummary
+          onSendMessage={sendMessage}
+          isLoading={isLoading}
+        />
+      )}
+
       {/* Messages */}
       <div className={styles.messagesContainer}>
         {messages.length === 0 ? (
@@ -326,7 +340,7 @@ export const SectionChat: React.FC<SectionChatProps> = ({
       </div>
 
       {/* Input */}
-      {showComposer && <ChatComposer onSend={sendMessage} disabled={isLoading} />}
+      {showComposer && <ChatComposer onSend={sendMessage} disabled={isLoading} placeholder={placeholder} />}
 
       {/* Edit Modal */}
       {pendingAction && (

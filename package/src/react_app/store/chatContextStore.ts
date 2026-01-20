@@ -27,6 +27,8 @@ export interface ChatSummaryType {
 // Leverage loops uses keyed chat states - one per person/suggestion request
 export type LeverageLoopChats = Record<string, ChatState>;
 
+export type OutcomesChats = Record<string, ChatState>;
+
 // Track which button action was selected per chat key
 export type SelectedActions = Record<string, string>;
 
@@ -34,26 +36,30 @@ interface ChatContextStore {
   // Current active chat context
   activeContext: ChatContext;
   
-  // Selected items for leverage loops
+  // Selected items for leverage loops and outcomes
   selectedPerson: LeverageLoopPerson | null;
   selectedSuggestionRequest: SuggestionRequest | null;
 
   leverageLoopSummaries: ChatSummaryType[];
+  outcomesSummaries: ChatSummaryType[];
+  
   
   // Track selected button action per chat (keyed by chatKey)
   selectedActions: SelectedActions;
   
   // Separate chat states for each context
   copilotChat: ChatState;
-  outcomesChat: ChatState;
   // Keyed by person full_name or suggestion request request_panel_title
   leverageLoopChats: LeverageLoopChats;
+  outcomesChats: OutcomesChats;
   
   // Actions
   setActiveContext: (context: ChatContext) => void;
   setSelectedPerson: (person: LeverageLoopPerson | null) => void;
   setSelectedSuggestionRequest: (request: SuggestionRequest | null) => void;
+  setSelectedOutcome: (outcome: SuggestionRequest | null) => void;
   upsertLeverageLoopSummary: (summary: ChatSummaryType) => void;
+  upsertOutcomesSummary: (summary: ChatSummaryType) => void;
   setSelectedAction: (chatKey: string, actionType: string) => void;
   getSelectedAction: (chatKey: string) => string | null;
 
@@ -67,6 +73,10 @@ interface ChatContextStore {
   getCurrentLeverageLoopKey: () => string | null;
   // Helper to get current leverage loop chat state
   getCurrentLeverageLoopChat: () => ChatState;
+  // Helper to get current outcomes chat key
+  getCurrentOutcomesKey: () => string;
+  // Helper to get current outcomes chat state
+  getCurrentOutcomesChat: () => ChatState;
 }
 
 const createInitialChatState = (contextId: string): ChatState => ({
@@ -88,11 +98,12 @@ export const useChatContextStore = create<ChatContextStore>()(
     selectedPerson: null,
     selectedSuggestionRequest: null,
     leverageLoopSummaries: [],
+    outcomesSummaries: [],
     selectedActions: {},
     
     copilotChat: createInitialChatState("copilot"),
-    outcomesChat: createInitialChatState("outcomes"),
     leverageLoopChats: {},
+    outcomesChats: {},
     
     setActiveContext: (context) => set({ activeContext: context }),
     
@@ -107,6 +118,11 @@ export const useChatContextStore = create<ChatContextStore>()(
       selectedPerson: request ? null : state.selectedPerson,
       activeContext: "leverage-loops",
     })),
+    
+    setSelectedOutcome: (outcome) => set({
+      selectedSuggestionRequest: outcome,
+      activeContext: "outcomes",
+    }),
     
     // Helper to get current leverage loop chat key based on selection
     getCurrentLeverageLoopKey: () => {
@@ -131,6 +147,26 @@ export const useChatContextStore = create<ChatContextStore>()(
       return EMPTY_CHAT_STATE;
     },
     
+    // Helper to get current outcomes chat key
+    getCurrentOutcomesKey: () => {
+      const state = get();
+      if (state.selectedSuggestionRequest) {
+        return state.selectedSuggestionRequest.request_panel_title || state.selectedSuggestionRequest.request_header_title || "outcomes-default";
+      }
+      return "outcomes-default";
+    },
+
+    getCurrentOutcomesChat: () => {
+      const state = get();
+      const key = state.getCurrentOutcomesKey();
+  
+      if (key && state.outcomesChats[key]) {
+        return state.outcomesChats[key];
+      }
+      // Return empty state for default case - will be initialized with message
+      return EMPTY_CHAT_STATE;
+    },
+    
     addMessage: (context, message, chatKey) => set((state) => {
       if (context === "leverage-loops") {
         const key = chatKey || state.getCurrentLeverageLoopKey();
@@ -140,6 +176,22 @@ export const useChatContextStore = create<ChatContextStore>()(
         return {
           leverageLoopChats: {
             ...state.leverageLoopChats,
+            [key]: {
+              ...existingChat,
+              messages: [...existingChat.messages, message],
+            },
+          },
+        };
+      }
+
+      if (context === "outcomes") {
+        const key = chatKey || state.getCurrentOutcomesKey();
+        if (!key) return state;
+        
+        const existingChat = state.outcomesChats[key] || createInitialChatState(`outcomes-${key}`);
+        return {
+          outcomesChats: {
+            ...state.outcomesChats,
             [key]: {
               ...existingChat,
               messages: [...existingChat.messages, message],
@@ -168,6 +220,28 @@ export const useChatContextStore = create<ChatContextStore>()(
         return {
           leverageLoopChats: {
             ...state.leverageLoopChats,
+            [key]: {
+              ...existingChat,
+              messages: existingChat.messages.map((msg) =>
+                msg.id === messageId
+                  ? { ...msg, content, isStreaming: isStreaming ?? msg.isStreaming }
+                  : msg
+              ),
+            },
+          },
+        };
+      }
+
+      if (context === "outcomes") {
+        const key = chatKey || state.getCurrentOutcomesKey();
+        if (!key) return state;
+        
+        const existingChat = state.outcomesChats[key];
+        if (!existingChat) return state;
+        
+        return {
+          outcomesChats: {
+            ...state.outcomesChats,
             [key]: {
               ...existingChat,
               messages: existingChat.messages.map((msg) =>
@@ -209,6 +283,22 @@ export const useChatContextStore = create<ChatContextStore>()(
           },
         };
       }
+
+      if (context === "outcomes") {
+        const key = chatKey || state.getCurrentOutcomesKey();
+        if (!key) return state;
+        
+        const existingChat = state.outcomesChats[key] || createInitialChatState(`outcomes-${key}`);
+        return {
+          outcomesChats: {
+            ...state.outcomesChats,
+            [key]: {
+              ...existingChat,
+              isLoading,
+            },
+          },
+        };
+      }
       
       const stateKey = getChatKey(context);
       return {
@@ -228,6 +318,18 @@ export const useChatContextStore = create<ChatContextStore>()(
           leverageLoopChats: {
             ...state.leverageLoopChats,
             [key]: createInitialChatState(`leverage-loop-${key}`),
+          },
+        };
+      }
+
+      if (context === "outcomes") {
+        const key = chatKey || state.getCurrentOutcomesKey();
+        if (!key) return state;
+        
+        return {
+          outcomesChats: {
+            ...state.outcomesChats,
+            [key]: createInitialChatState(`outcomes-${key}`),
           },
         };
       }
@@ -253,6 +355,21 @@ export const useChatContextStore = create<ChatContextStore>()(
       }
     }),
 
+    upsertOutcomesSummary: (summary) => set((state) => {
+      const existingIndex = state.outcomesSummaries.findIndex((s) => s.id === summary.id);
+      if (existingIndex >= 0) {
+        // Update existing summary
+        return {
+          outcomesSummaries: state.outcomesSummaries.map((s) => s.id === summary.id ? summary : s),
+        };
+      } else {
+        // Add new summary
+        return {
+          outcomesSummaries: [...state.outcomesSummaries, summary],
+        };
+      }
+    }),
+
     setSelectedAction: (chatKey, actionType) => set((state) => ({
       selectedActions: {
         ...state.selectedActions,
@@ -267,15 +384,9 @@ export const useChatContextStore = create<ChatContextStore>()(
   }), { name: "ChatContextStore" })
 );
 
-// Helper function to get the correct chat state key for non-leverage-loop contexts
-function getChatKey(context: ChatContext): keyof Pick<ChatContextStore, "copilotChat" | "outcomesChat"> {
-  switch (context) {
-    case "copilot":
-      return "copilotChat";
-    case "outcomes":
-      return "outcomesChat";
-    default:
-      return "copilotChat"; // Fallback, leverage-loops handled separately
-  }
+// Helper function to get the correct chat state key for copilot context only
+// (leverage-loops and outcomes use keyed chats and are handled separately)
+function getChatKey(_context: ChatContext): "copilotChat" {
+  return "copilotChat";
 }
 

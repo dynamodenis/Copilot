@@ -52,6 +52,9 @@ export const CopilotApp: React.FC<CopilotAppProps> = ({
       setSelectedPerson(null);
       setSelectedSuggestionRequest(null);
     }
+    if (section === "outcomes") {
+      setSelectedSuggestionRequest(null);
+    }
   };
 
   const renderContent = () => {
