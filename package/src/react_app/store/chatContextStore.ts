@@ -39,6 +39,7 @@ interface ChatContextStore {
   // Selected items for leverage loops and outcomes
   selectedPerson: LeverageLoopPerson | null;
   selectedSuggestionRequest: SuggestionRequest | null;
+  draftSuggestionRequest: SuggestionRequest | null;
 
   leverageLoopSummaries: ChatSummaryType[];
   outcomesSummaries: ChatSummaryType[];
@@ -58,6 +59,7 @@ interface ChatContextStore {
   setSelectedPerson: (person: LeverageLoopPerson | null) => void;
   setSelectedSuggestionRequest: (request: SuggestionRequest | null) => void;
   setSelectedOutcome: (outcome: SuggestionRequest | null) => void;
+  setDraftSuggestionRequest: (request: SuggestionRequest | null) => void;
   upsertLeverageLoopSummary: (summary: ChatSummaryType) => void;
   upsertOutcomesSummary: (summary: ChatSummaryType) => void;
   setSelectedAction: (chatKey: string, actionType: string) => void;
@@ -97,6 +99,7 @@ export const useChatContextStore = create<ChatContextStore>()(
     activeContext: "copilot",
     selectedPerson: null,
     selectedSuggestionRequest: null,
+    draftSuggestionRequest: null,
     leverageLoopSummaries: [],
     outcomesSummaries: [],
     selectedActions: {},
@@ -123,6 +126,8 @@ export const useChatContextStore = create<ChatContextStore>()(
       selectedSuggestionRequest: outcome,
       activeContext: "outcomes",
     }),
+    
+    setDraftSuggestionRequest: (request) => set({ draftSuggestionRequest: request }),
     
     // Helper to get current leverage loop chat key based on selection
     getCurrentLeverageLoopKey: () => {

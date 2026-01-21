@@ -94,6 +94,8 @@ export const SectionChat: React.FC<SectionChatProps> = ({
           } else if (context === "outcomes") {
             useLeverageLoopsStore.getState().prependOutcomesSuggestionRequest(suggestionData);
           }
+          // Set as draft so summary components can use it
+          useChatContextStore.getState().setDraftSuggestionRequest(suggestionData);
         }
       } catch (e) {
         console.error("Failed to parse suggestion request JSON:", e);
@@ -230,7 +232,7 @@ export const SectionChat: React.FC<SectionChatProps> = ({
         const promptContent = `${basePrompt}\n\n${componentRestriction}\n\nUser: ${content.trim()}`;
 
         // Get the LLM endpoint and user info from the variables store
-        const { copilot_llm_endpoint, user_id } = useVariablesStore.getState();
+        const { copilot_llm_endpoint, user_id, dataSource } = useVariablesStore.getState();
         const apiUrl = copilot_llm_endpoint || "http://localhost:3001";
         
         // Get master_person_id if a person is selected
@@ -252,6 +254,7 @@ export const SectionChat: React.FC<SectionChatProps> = ({
             context,
             user_id,           // Pass user ID for suggestion request creation
             master_person_id,  // Pass master person ID if available
+            dataSource,
           }),
         });
 

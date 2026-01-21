@@ -97,6 +97,7 @@ interface LeverageLoopsStore {
   setLeverageLoops: (leverageLoops: LeverageLoopPerson[]) => void;
   addLeverageLoops: (leverageLoops: LeverageLoopPerson[]) => void;
   createSuggestionRequest: (suggestionRequest: SuggestionRequest) => Promise<void>;
+  updateSuggestionRequest: (suggestionRequestId: number, suggestionRequest: SuggestionRequest) => Promise<void>;
   deleteSuggestionRequest: (suggestionRequestId: number) => Promise<void>;
   prependSuggestionRequest: (suggestionRequest: SuggestionRequest) => void;
   prependOutcomesSuggestionRequest: (suggestionRequest: SuggestionRequest) => void;
@@ -276,6 +277,50 @@ export const useLeverageLoopsStore = create<LeverageLoopsStore>()(
         }
       },
 
+      updateSuggestionRequest: async (suggestion_request_id: number, suggestionRequest: SuggestionRequest) => {
+        set({ isCreatingSuggestionRequest: true, createSuggestionRequestError: null });
+        try {
+          const { token, baseUrl, dataSource } = useVariablesStore.getState();
+          
+          if (!baseUrl || (typeof baseUrl === 'string' && baseUrl.trim() === '')) {
+            console.error('VariablesStore state:', useVariablesStore.getState());
+            throw new Error('Base URL is not defined. Please provide it as a prop to CopilotApp.');
+          }
+          if (!token || (typeof token === 'string' && token.trim() === '')) {
+            console.error('VariablesStore state:', useVariablesStore.getState());
+            throw new Error('Token is not defined. Please provide it as a prop to CopilotApp.');
+          }
+          
+          const headers = {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`,
+            'x-data-source': dataSource || ''
+          };
+            
+          const response = await fetch(`${baseUrl}:MkA4QsNh/suggestion-requests/${suggestion_request_id}`, 
+            { headers, method: 'PUT', body: JSON.stringify(suggestionRequest) }
+          );
+
+          // Parse the response body once
+          const data = await response.json();
+
+          if (!response.ok) {
+            const apiMessage = data?.message || data?.error || 'Failed to update suggestion request';
+            throw new Error(`HTTP ${response.status}: ${apiMessage}`);
+          }
+
+          set((state) => ({ 
+            suggestionRequests: state.suggestionRequests.map(sr => sr.id === suggestion_request_id ? suggestionRequest : sr), 
+            isUpdatingSuggestionRequest: false 
+          }));
+        } catch (error) {
+          set({
+            createSuggestionRequestError: error instanceof Error ? error.message : 'Unknown error',
+            isCreatingSuggestionRequest: false
+          });
+        }
+      },
+    
       deleteSuggestionRequest: async (suggestionRequestId: number) => {
         set({ isDeletingSuggestionRequest: true, deleteSuggestionRequestError: null });
         try {
