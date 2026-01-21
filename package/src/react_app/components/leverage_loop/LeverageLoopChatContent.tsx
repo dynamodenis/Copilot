@@ -93,7 +93,7 @@ export const suggestionRequestInitialSectionContentPrompt = (suggestionRequest: 
           {
             component: "TextContent",
             props: {
-              textMarkdown: `${suggestionRequest.request_context}`
+              textMarkdown: `${suggestionRequest.request_context || ""}`
             }
           },
           // {

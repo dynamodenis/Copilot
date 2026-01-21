@@ -44,6 +44,7 @@ export const CopilotSidebar: React.FC<CopilotSidebarProps> = ({
     setSelectedSuggestionRequest,
     addMessage,
     leverageLoopChats,
+    outcomesChats
   } = useChatContextStore(
     useShallow((state) => ({
       selectedPerson: state.selectedPerson,
@@ -52,6 +53,7 @@ export const CopilotSidebar: React.FC<CopilotSidebarProps> = ({
       setSelectedSuggestionRequest: state.setSelectedSuggestionRequest,
       addMessage: state.addMessage,
       leverageLoopChats: state.leverageLoopChats,
+      outcomesChats: state.outcomesChats,
     }))
   );
 
@@ -156,7 +158,7 @@ export const CopilotSidebar: React.FC<CopilotSidebarProps> = ({
     onSectionChange("outcomes");
 
     const chatKey = suggestionRequest.request_panel_title;
-    const existingChat = leverageLoopChats[chatKey];
+    const existingChat = outcomesChats[chatKey];
     const hasInitialMessage = existingChat?.messages?.[0]?.role === "assistant";
 
     if (!hasInitialMessage) {

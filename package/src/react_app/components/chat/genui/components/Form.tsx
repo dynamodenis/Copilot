@@ -162,18 +162,47 @@ export const Checkbox: React.FC<CheckboxProps> = ({
 export const RadioGroup: React.FC<RadioGroupProps> = ({
   name,
   options = [],
+  children,
   value = '',
   onChange,
 }) => {
   const [selectedValue, setSelectedValue] = useState(value);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const newValue = e.target.value;
+  const handleChange = (newValue: string) => {
     setSelectedValue(newValue);
     onChange?.(name, newValue);
   };
 
-  // Guard against undefined/null options
+  // If children are provided (LLM format with RadioItem components), render them
+  if (children && Array.isArray(children) && children.length > 0) {
+    return (
+      <div className={styles.radioGroup}>
+        {children.map((child, index) => {
+          const childObj = child as { component?: string; props?: { value?: string; label?: string } };
+          if (childObj.component === 'RadioItem' && childObj.props) {
+            const { value: itemValue, label } = childObj.props;
+            const radioValue = itemValue || `item-${index}`;
+            return (
+              <div key={radioValue} className={styles.radioWrapper}>
+                <input
+                  type="radio"
+                  id={`${name}-${radioValue}`}
+                  name={name}
+                  value={radioValue}
+                  checked={selectedValue === radioValue}
+                  onChange={() => handleChange(radioValue)}
+                />
+                <label htmlFor={`${name}-${radioValue}`}>{label || radioValue}</label>
+              </div>
+            );
+          }
+          return null;
+        })}
+      </div>
+    );
+  }
+
+  // Fallback to options format
   if (!options || !Array.isArray(options) || options.length === 0) {
     return <div className={styles.radioGroup}>No options available</div>;
   }
@@ -188,7 +217,7 @@ export const RadioGroup: React.FC<RadioGroupProps> = ({
             name={name}
             value={option.value}
             checked={selectedValue === option.value}
-            onChange={handleChange}
+            onChange={() => handleChange(option.value)}
           />
           <label htmlFor={`${name}-${option.value}`}>{option.label}</label>
         </div>
@@ -201,6 +230,7 @@ export const RadioGroup: React.FC<RadioGroupProps> = ({
 export const CheckBoxGroup: React.FC<CheckBoxGroupProps> = ({
   name,
   options = [],
+  children,
   values = [],
   onChange,
 }) => {
@@ -214,7 +244,37 @@ export const CheckBoxGroup: React.FC<CheckBoxGroupProps> = ({
     onChange?.(name, newValues);
   };
 
-  // Guard against undefined/null options
+  // If children are provided (LLM format with CheckBoxItem components), render them
+  if (children && Array.isArray(children) && children.length > 0) {
+    return (
+      <div className={styles.checkboxGroup}>
+        {children.map((child, index) => {
+          // Handle CheckBoxItem component format from LLM
+          const childObj = child as { component?: string; props?: { name?: string; label?: string } };
+          if (childObj.component === 'CheckBoxItem' && childObj.props) {
+            const { name: itemName, label } = childObj.props;
+            const itemValue = itemName || `item-${index}`;
+            return (
+              <div key={itemValue} className={styles.checkboxWrapper}>
+                <input
+                  type="checkbox"
+                  id={`${name}-${itemValue}`}
+                  name={name}
+                  value={itemValue}
+                  checked={selectedValues.includes(itemValue)}
+                  onChange={(e) => handleChange(itemValue, e.target.checked)}
+                />
+                <label htmlFor={`${name}-${itemValue}`}>{label || itemValue}</label>
+              </div>
+            );
+          }
+          return null;
+        })}
+      </div>
+    );
+  }
+
+  // Fallback to options format
   if (!options || !Array.isArray(options) || options.length === 0) {
     return <div className={styles.checkboxGroup}>No options available</div>;
   }

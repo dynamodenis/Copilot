@@ -225,6 +225,11 @@ const iconMap: Record<string, LucideIcon> = {
 };
 
 export const Icon: React.FC<IconProps> = ({ name, size = 18 }) => {
+  // Guard against undefined name
+  if (!name) {
+    return <span className={styles.icon} style={{ width: size, height: size }}>•</span>;
+  }
+  
   const IconComponent = iconMap[name.toLowerCase()];
   
   if (!IconComponent) {

@@ -65,7 +65,7 @@ export interface SuggestionRequest {
   request_panel_title: string;
   request_header_title: string;
   request_context: string;
-  status: "draft" | "suggestion"  | "processing" | "archived";
+  status: "draft" | "suggestion"  | "processing" | "archived" | "submitted";
   leverage_loop_suggestions?: any[];
   leverage_loop_suggestion_count?: number;
   outcome_suggestions?: any[];
@@ -98,6 +98,8 @@ interface LeverageLoopsStore {
   addLeverageLoops: (leverageLoops: LeverageLoopPerson[]) => void;
   createSuggestionRequest: (suggestionRequest: SuggestionRequest) => Promise<void>;
   deleteSuggestionRequest: (suggestionRequestId: number) => Promise<void>;
+  prependSuggestionRequest: (suggestionRequest: SuggestionRequest) => void;
+  prependOutcomesSuggestionRequest: (suggestionRequest: SuggestionRequest) => void;
 }
 
 export const useLeverageLoopsStore = create<LeverageLoopsStore>()(
@@ -316,6 +318,14 @@ export const useLeverageLoopsStore = create<LeverageLoopsStore>()(
 
       setLeverageLoops: (leverageLoops) => set({ leverageLoops }),
       addLeverageLoops: (newLoops) => set((state) => ({ leverageLoops: [...state.leverageLoops, ...newLoops] })),
+      
+      prependSuggestionRequest: (suggestionRequest) => set((state) => ({ 
+        suggestionRequests: [suggestionRequest, ...state.suggestionRequests] 
+      })),
+      
+      prependOutcomesSuggestionRequest: (suggestionRequest) => set((state) => ({ 
+        outcomesSuggestionRequests: [suggestionRequest, ...state.outcomesSuggestionRequests] 
+      })),
     }),
     { name: "LeverageLoopsStore" }
   )

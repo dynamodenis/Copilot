@@ -223,7 +223,7 @@ export const LeverageLoopSidebarContent: React.FC<LeverageLoopSidebarContentProp
     <div className={styles.sidebarContent}>
       {/* Search */}
       <div className={styles.searchWrapper} ref={searchContainerRef}>
-        <div className={styles.searchContainer}>
+        <div className={`${styles.searchContainer} ${!selectedPerson && !selectedSuggestionRequest ? styles.animated : ''}`}>
           <span className={styles.searchIcon}>🔍</span>
           <input
             type="text"

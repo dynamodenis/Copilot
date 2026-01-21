@@ -31,7 +31,7 @@
   z-index: 0;
   
   // Animated gradient border - only on the border, not the fill
-  &::before {
+  &.animated::before {
     content: "";
     position: absolute;
     inset: 0;
@@ -59,11 +59,16 @@
     pointer-events: none;
   }
 
-  &:focus-within {
+  &.animated:focus-within {
     &::before {
       animation: none;
       background: rgba(232, 121, 249, 0.6);
     }
+  }
+
+  // Simple border for non-animated state
+  &:not(.animated) {
+    border: 1px solid var(--color-border-subtle);
   }
 }
 

@@ -122,7 +122,8 @@ export interface CheckboxProps extends BaseGenUIProps {
 // RadioGroup props
 export interface RadioGroupProps extends BaseGenUIProps {
   name: string;
-  options: { value: string; label: string }[];
+  options?: { value: string; label: string }[];
+  children?: unknown[];
   value?: string;
   onChange?: (name: string, value: string) => void;
 }
@@ -130,7 +131,8 @@ export interface RadioGroupProps extends BaseGenUIProps {
 // CheckBoxGroup props
 export interface CheckBoxGroupProps extends BaseGenUIProps {
   name: string;
-  options: { value: string; label: string }[];
+  options?: { value: string; label: string }[];
+  children?: unknown[];
   values?: string[];
   onChange?: (name: string, values: string[]) => void;
 }

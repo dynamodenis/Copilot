@@ -6,6 +6,7 @@ import { EditPromptModal } from "./EditPromptModal";
 import type { PendingAction, ActionEvent } from "./types";
 import { useChatContextStore, type ChatContext, type ChatMessageType } from "@/react_app/store/chatContextStore";
 import { useVariablesStore } from "@/react_app/store/variablesStore";
+import { useLeverageLoopsStore } from "@/react_app/store/leverageLoopsStore";
 import { createSectionChatActionHandler } from "./SectionChatActions";
 import { getComponentInstruction } from "./genui/componentConfig";
 import { LeverageLoopSummary } from "../leverage_loop/LeverageLoopChatSummary";
@@ -67,38 +68,68 @@ export const SectionChat: React.FC<SectionChatProps> = ({
     })
   );
 
-  function cleanDocumentContent(rawContent: string) {
-    // Extract the SUMMARY section
-
-      const summaryMatch = rawContent.match(/\[SUMMARY\](.*?)\[\/SUMMARY\]/s);
-
-      let summary = null;
-      if (summaryMatch && summaryMatch[1]) {
-        summary = summaryMatch[1].trim();
-        // Remove the SUMMARY section and everything after it
-        // let cleanedContent = rawContent.replace(/\[SUMMARY\].*$/s, '').trim();
-        let cleanedContent = rawContent.replace(/\[SUMMARY\].*$/s, '</content>').trim();
+  function cleanDocumentContent(rawContent: string, updateStore = false) {
+    let cleanedContent = rawContent;
+    let suggestionData = null;
+    
+    // First: decode HTML-encoded tags so regex can find them
+    cleanedContent = cleanedContent
+      .replace(/&lt;/g, '<')
+      .replace(/&gt;/g, '>');
+    
+    // Extract and parse SUGGESTION_REQUEST
+    const suggestionRequestMatch = cleanedContent.match(/\[SUGGESTION_REQUEST\](.*?)\[\/SUGGESTION_REQUEST\]/s);
+    if (suggestionRequestMatch && suggestionRequestMatch[1]) {
+      try {
+        const decodedJson = suggestionRequestMatch[1].trim()
+          .replace(/&quot;/g, '"')
+          .replace(/&amp;/g, '&')
+          .replace(/&#39;/g, "'");
+        suggestionData = JSON.parse(decodedJson);
         
-        if (summary && context === "leverage-loops") {
-          updateLeverageLoopSummary(summary);
+        // Only update store when explicitly requested (at end of streaming)
+        if (updateStore) {
+          if (context === "leverage-loops") {
+            useLeverageLoopsStore.getState().prependSuggestionRequest(suggestionData);
+          } else if (context === "outcomes") {
+            useLeverageLoopsStore.getState().prependOutcomesSuggestionRequest(suggestionData);
+          }
         }
-        if (summary && context === "outcomes") {
-          updateOutcomesSummary(summary);
-        }
-        // If there's no SUMMARY section, just use the original content
-        if (!summaryMatch) {
-          cleanedContent = rawContent;
-        }
-        
-        return {
-          cleanContent: cleanedContent
-        };
+      } catch (e) {
+        console.error("Failed to parse suggestion request JSON:", e);
       }
-      
-      return {
-        cleanContent: rawContent
-      };
+      // Remove from content
+      cleanedContent = cleanedContent.replace(/\[SUGGESTION_REQUEST\].*?\[\/SUGGESTION_REQUEST\]/s, '');
     }
+
+    // Extract and remove SUMMARY
+    const summaryMatch = cleanedContent.match(/\[SUMMARY\](.*?)\[\/SUMMARY\]/s);
+    if (summaryMatch && summaryMatch[1]) {
+      const summary = summaryMatch[1].trim();
+      cleanedContent = cleanedContent.replace(/\[SUMMARY\].*?\[\/SUMMARY\]/s, '');
+      
+      if (summary && context === "leverage-loops") {
+        updateLeverageLoopSummary(summary);
+      }
+      if (summary && context === "outcomes") {
+        updateOutcomesSummary(summary);
+      }
+    }
+
+    // Get only the last <content thesys="true">...</content> block
+    const contentMatches = cleanedContent.match(/<content\s+thesys="true">([\s\S]*?)<\/content>/g);
+    if (contentMatches && contentMatches.length > 0) {
+      const lastMatch = contentMatches[contentMatches.length - 1];
+      if (lastMatch) {
+        cleanedContent = lastMatch;
+      }
+    }
+    
+    return {
+      cleanContent: cleanedContent.trim(),
+      suggestionData
+    };
+  }
   
 
   /**
@@ -198,9 +229,12 @@ export const SectionChat: React.FC<SectionChatProps> = ({
         const basePrompt = systemPrompt || "You are a helpful AI assistant.";
         const promptContent = `${basePrompt}\n\n${componentRestriction}\n\nUser: ${content.trim()}`;
 
-        // Get the LLM endpoint from the variables store
-        const { copilot_llm_endpoint } = useVariablesStore.getState();
+        // Get the LLM endpoint and user info from the variables store
+        const { copilot_llm_endpoint, user_id } = useVariablesStore.getState();
         const apiUrl = copilot_llm_endpoint || "http://localhost:3001";
+        
+        // Get master_person_id if a person is selected
+        const master_person_id = selectedPerson?.master_person?.id;
         
         const response = await fetch(`${apiUrl}/api/chat`, {
           method: "POST",
@@ -215,7 +249,9 @@ export const SectionChat: React.FC<SectionChatProps> = ({
             },
             threadId,
             responseId,
-            context, // Pass context to backend if needed
+            context,
+            user_id,           // Pass user ID for suggestion request creation
+            master_person_id,  // Pass master person ID if available
           }),
         });
 
@@ -247,7 +283,7 @@ export const SectionChat: React.FC<SectionChatProps> = ({
         }
 
         // After streaming complete, extract summary and update store
-        const { cleanContent } = cleanDocumentContent(accumulatedContent);
+        const { cleanContent } = cleanDocumentContent(accumulatedContent, true);
         
         // Mark streaming as complete with clean content (without summary tags)
         updateMessage(context, responseId, cleanContent, false);

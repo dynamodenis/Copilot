@@ -39,7 +39,7 @@ export const DEFAULT_COMPONENT_WHITELIST: Record<string, ComponentConfig> = {
   Select: { allowed: false, description: "Dropdown select (often unnecessary)" },
   RadioGroup: { allowed: false, description: "Radio button group for single selection" },
   RadioItem: { allowed: true, description: "Individual radio button item" },
-  CheckBoxGroup: { allowed: false, description: "Checkbox group for multiple selection" },
+  CheckBoxGroup: { allowed: true, description: "Checkbox group for multiple selection" },
   CheckBoxItem: { allowed: true, description: "Individual checkbox item" },
   DatePicker: { allowed: true, description: "Date picker input" },
   
